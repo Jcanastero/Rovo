@@ -4,7 +4,7 @@ status: backlog
 created: 2026-03-16T00:00:00Z
 progress: 0%
 prd: .claude/prds/rovo-sprint-recap-scrum.md
-github: [Will be updated when synced to GitHub]
+github: https://github.com/Jcanastero/Rovo/issues/1
 ---
 
 # Epic: ROVO Sprint Recap Scrum - Correccion de Acceso y Burndown Chart
@@ -96,11 +96,11 @@ Antes de modificar el prompt, confirmar la causa raiz del Defecto 1:
 
 ## Tasks Created
 
-- [ ] [001.md](.claude/epics/rovo-sprint-recap-scrum/001.md) - Diagnostico - Causa raiz de acceso a sprints cerrados (parallel: false)
-- [ ] [002.md](.claude/epics/rovo-sprint-recap-scrum/002.md) - Fix JQL - Eliminar openSprints() del flujo de fallback (parallel: false, depends: 001)
-- [ ] [003.md](.claude/epics/rovo-sprint-recap-scrum/003.md) - Fix burndown URL - Resolucion de boardId y sprintId (parallel: false, depends: 001)
-- [ ] [004.md](.claude/epics/rovo-sprint-recap-scrum/004.md) - Aplicar cambios en Atlassian - Prompt y configuracion Run As (parallel: false, depends: 002, 003)
-- [ ] [005.md](.claude/epics/rovo-sprint-recap-scrum/005.md) - Validacion - Casos de prueba con owners reales (parallel: false, depends: 004)
+- [ ] [#2](https://github.com/Jcanastero/Rovo/issues/2) - Diagnostico - Causa raiz de acceso a sprints cerrados (parallel: false)
+- [ ] [#3](https://github.com/Jcanastero/Rovo/issues/3) - Fix JQL - Eliminar openSprints() del flujo de fallback (parallel: false, depends: #2)
+- [ ] [#4](https://github.com/Jcanastero/Rovo/issues/4) - Fix burndown URL - Resolucion de boardId y sprintId (parallel: false, depends: #2)
+- [ ] [#5](https://github.com/Jcanastero/Rovo/issues/5) - Aplicar cambios en Atlassian - Prompt y configuracion Run As (parallel: false, depends: #3, #4)
+- [ ] [#6](https://github.com/Jcanastero/Rovo/issues/6) - Validacion - Casos de prueba con owners reales (parallel: false, depends: #5)
 
 Total tasks: 5
 Parallel tasks: 0
