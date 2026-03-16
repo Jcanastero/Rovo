@@ -28,6 +28,7 @@ Copiar el contenido de `ROVO/RovoSprintReportScrum.txt` al panel del agente en A
 
 ## Progress
 
+- [x] Prompt actualizado en ROVO/RovoSprintReportScrum.txt (commit e3b5fac, branch epic/rovo-sprint-recap-scrum)
 - [ ] Panel Atlassian Studio abierto
 - [ ] Instrucciones del agente reemplazadas con el prompt actualizado
 - [ ] Cambios guardados
@@ -35,7 +36,13 @@ Copiar el contenido de `ROVO/RovoSprintReportScrum.txt` al panel del agente en A
 - [ ] Resultado verificado: reporte con datos reales
 
 ## Completed
-(pendiente)
+Prompt listo para aplicar. Cambios incluidos:
+- Issues #3: STRICT PROJECT ONLY (reemplaza GLOBAL SCOPE PERMISSION) + eliminado openSprints()
+- Issue #4: BURNDOWN ID RESOLUTION (reemplaza ID Consistency Rule)
+- Issue #5: Content Synthesis actualizado para las 3 secciones:
+  * Key Goals Achieved: solo DONE, agrupado por Epic, resumen de valor entregado
+  * Key Technical Goals Achieved: solo DONE, agrupado por Epic/Componente, resumen tecnico
+  * Major Struggles: evalua TODOS los issues incompletos con 3 niveles de prioridad + analisis de comentarios
 
 ## Blocked
 None
