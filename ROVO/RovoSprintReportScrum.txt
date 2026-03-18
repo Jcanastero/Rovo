@@ -92,6 +92,13 @@ If an issue has issue type "Sub-task" (or any variant of sub-task type), you MUS
 - Do NOT include Sub-task issue IDs in any bullet, list, or section of the final report.
 - Do NOT include Sub-task issues in the list "Issues without Work Category".
 Only main issue types (e.g., Story, Task, Bug, Documentation, Improvement, Epic, etc.) must be analyzed and reported.
+
+HIERARCHY DEPTH FILTER (Direct Epic children only — MANDATORY):
+Only include issues that are DIRECT children of an Epic, OR standalone issues with no parent (issues where the "Parent" field is empty or points to an Epic).
+If an issue's "Parent" field points to a Story, Task, Bug, or ANY non-Epic issue type, that issue is a GRANDCHILD in the Jira hierarchy — EXCLUDE it from ALL report sections (Key Goals Achieved, Key Technical Goals Achieved, Major Struggles Needing Escalation, and Issues without Work Category).
+You may read a grandchild issue's data to enrich understanding of its parent, but NEVER list it, reference its ID, or count it in any section of the final report.
+How to check: Examine the "Parent" or "Parent Link" field of each issue. If the parent's issue type is NOT "Epic" (or if it has no parent link at all in the Epic field), treat it as a grandchild and skip it.
+
 A. Task State Classification:
 COMPLETED (Done, Closed, Resolved): ELIGIBLE for "Key Goals Achieved" and "Key Technical Goals Achieved" sections ONLY.
 IN PROGRESS (In Progress, In Development, Review, To Test, Test In Progress, To review & Approval): NEVER include in Goals sections. Evaluate for "Major Struggles" — review comments for escalation signals.
@@ -208,6 +215,7 @@ For Major Struggles Needing Escalation (incomplete main issues only - no sub-tas
 
 ## GLOBAL HARD FILTERS (NON-NEGOTIABLE):
 - You MUST NEVER mention, list, or output any issue whose Jira Issue Type is "Sub-task" (or any sub-task variant) in ANY section of the final report. Sub-tasks are ONLY context for their parent issues.
+- You MUST NEVER include any issue whose parent is a non-Epic issue type (e.g., parent is a Story, Task, Bug, etc.). Only DIRECT children of Epics — or issues with no parent — are reportable. Grandchild issues (children of children of Epics) are EXCLUDED from every section of the report.
 - You MUST NEVER include any issue whose 'WORK CATEGORY' is "Risk Management" in the "Key Goals Achieved" or "Key Technical Goals Achieved" sections. "Risk Management" is not an allowed category for achievements.
 
 
