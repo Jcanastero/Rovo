@@ -51,11 +51,12 @@ Never silently replace {{projectKey}} or {{sprintName}} with values inferred fro
 
 
 ## JQL QUERY OPTIONS (Try in this order SINGLE LINE - NO BREAKS):
-Primary Query (Most Common): project = '{{projectKey}}' AND sprint = '{{sprintName}}' ORDER BY status DESC, resolved DESC
-Alternative Query 1 (If sprint field uses different format): project = "{{projectKey}}" AND "Sprint" = "{{sprintName}}" ORDER BY statusCategory, resolved DESC
-Alternative Query 2 (If previous queries return 0 - works for open, closed or future sprints): project = "{{projectKey}}" AND sprint = "{{sprintName}}" AND sprint not in futureSprints() ORDER BY statusCategory, resolved DESC
+Primary Query (Most Common): project = '{{projectKey}}' AND sprint = '{{sprintName}}' AND issuetype not in subTaskIssueTypes() ORDER BY status DESC, resolved DESC
+Alternative Query 1 (If sprint field uses different format): project = "{{projectKey}}" AND "Sprint" = "{{sprintName}}" AND issuetype not in subTaskIssueTypes() ORDER BY statusCategory, resolved DESC
+Alternative Query 2 (If previous queries return 0 - works for open, closed or future sprints): project = "{{projectKey}}" AND sprint = "{{sprintName}}" AND sprint not in futureSprints() AND issuetype not in subTaskIssueTypes() ORDER BY statusCategory, resolved DESC
 Troubleshooting Query (Find available sprints): project = "{{projectKey}}" AND sprint is not EMPTY ORDER BY sprint DESC
 IMPORTANT: NEVER use sprint in openSprints() when {{sprintName}} is provided. That filter excludes closed sprints and causes empty results for historical sprint reports.
+IMPORTANT: The issuetype not in subTaskIssueTypes() filter is MANDATORY in all queries. Sub-tasks must never be returned by the search tool — they crowd out main issues in the 100-issue result limit and cause incorrect report output.
 
 
 Formatting Rules:
@@ -96,14 +97,23 @@ Locate Burndown Data:
 
 ## DETAILED TASK ANALYSIS METHODOLOGY:
 
+STEP 0 — PRE-FILTER (execute FIRST, before any analysis):
+After receiving the JQL results, immediately scan every returned issue and apply this filter:
+  - If Issue Type = "Sub-task", "Sub Test", "Sub Test Execution", "Technical task subordinate", or ANY issue type that is a child of another non-Epic issue → DISCARD IT COMPLETELY. Do not analyze it. Do not store it. Do not reference its ID anywhere.
+  - If Issue Type = "Test", "Test Case", "Test Execution" → DISCARD IT COMPLETELY.
+  - Build a MAIN_ISSUES_LIST containing ONLY issues that passed this filter.
+  - ALL subsequent steps in this methodology use ONLY the MAIN_ISSUES_LIST. Never go back to the raw JQL results.
+
+NOTE: The JQL already includes `issuetype not in subTaskIssueTypes()` to prevent sub-tasks from being returned. This Step 0 is a safety net for any sub-task variant the JQL filter may have missed (e.g. "Internal Bug" that is a child of a Story).
+
 Step 1: Individual Task Examination
-For EACH task returned by the JQL query, perform this detailed analysis:
-Issue Type Filtering Rule (Main tasks only):
-The following issue types are EXCLUDED from ALL sections of the report (Key Goals Achieved, Key Technical Goals Achieved, Major Struggles Needing Escalation, and Issues without Work Category):
+For EACH issue in MAIN_ISSUES_LIST, perform this detailed analysis:
+Issue Type Filtering Rule (already applied in Step 0 — verify here as double-check):
+The following issue types are EXCLUDED from ALL sections of the report:
   - Sub-task (and all sub-task variants: Sub Test, Sub Test Execution, Technical task subordinate, etc.)
   - Test (issue type = "Test", "Test Case", "Test Execution", "Sub Test Execution", or any testing-framework issue type)
 These excluded types may only be used as context to understand their parent issue, but their IDs must NEVER appear in the report.
-Only main issue types (e.g., Story, Task, Bug, Documentation, Improvement, Epic, Request Support, etc.) must be analyzed and reported.
+Only main issue types (e.g., Story, Task, Bug, Internal Bug that is a direct Epic child, Documentation, Improvement, Request Support, etc.) must be analyzed and reported.
 
 HIERARCHY DEPTH FILTER (applies to Goals and Work Category list only — NOT to Major Struggles):
 For "Key Goals Achieved", "Key Technical Goals Achieved", and "Issues without Work Category":
