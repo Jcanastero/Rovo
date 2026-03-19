@@ -156,19 +156,11 @@ Mandatory Exclusion: DO NOT include tasks with any other Work Category, tasks wi
 
 Classify as "Major Struggles Needing Escalation" — evaluate ALL main issues (no sub-tasks, no Test types) that are NOT in Done/Closed/Resolved status. Every incomplete main issue MUST appear in this section. NEVER omit an incomplete issue from this section. Classify each one using this priority:
 
-  PRIORITY 1 — IMMEDIATE ESCALATION: Status is Blocked, Waiting, or On Hold. These are hard blockers and require management action now.
+  IMMEDIATE ESCALATION: Status is Blocked, Waiting, or On Hold — OR — comments/activity explicitly show a blocker, external dependency, or technical impediment. Requires management action. Write the blocker detail, owner, specific ask, and due date.
 
-  PRIORITY 2 — ESCALATION CANDIDATE: Status is In Progress, In Development, Review, To Test, or To review & Approval AND comments or activity show explicit blocker signals (dependency blocked, waiting for external party, technical impediment, missed deadline mentioned). Read comments carefully to confirm the signal.
+  NEEDS REVIEW: All other incomplete issues (In Progress, In Development, Review, To Test, To Do, Open) with no explicit blocker found in comments. The sprint ended without completing them. Mention each one and suggest re-planning for the next sprint or escalation if there is a delivery commitment at risk.
 
-  PRIORITY 3 — NEEDS REVIEW: Any other incomplete issue — including To Do, Open, or active-status issues with no explicit blocker signals in comments. The sprint ended without completing them. These must be reviewed: either re-planned for the next sprint or escalated if there is a delivery commitment at risk.
-
-  EXCLUDE only: sub-task issue types and Test issue types.
-
-For each issue: read comments and activity to understand current state, then write:
-  (a) delivery risk — what it means that this was not completed
-  (b) concrete next step — specific action to resolve or re-plan
-  (c) owner, specific ask, and recommended due date
-  For Priority 3: if no explicit blocker is found, note that the item was not finished and should be reviewed for re-planning or escalation.
+  EXCLUDE only: sub-task issue types and Test issue types. NEVER omit an incomplete main issue from this section.
 
 IMPORTANT CLARIFICATION ON RISK CATEGORIES:
 - "Risk Mitigation" is an allowed WORK CATEGORY only for "Key Technical Goals Achieved".
@@ -210,30 +202,30 @@ Sub-task issue types must never appear as separate entries or IDs in any section
 For Key Goals Achieved (DONE issues only - Work Category: Client Services, Product:Feature, Product:Discovery, Deprecation):
    - Status Filter: ONLY include issues in Done / Closed / Resolved. SKIP any issue not in these statuses.
    - Sub-task Filter: NEVER include sub-task issue types. Use sub-task data only to enrich the parent issue analysis.
-   - Grouping Rule: Group by Epic. If an issue has no Epic, group under "General Improvements".
-   - ONE BULLET PER EPIC GROUP: Do NOT create a separate bullet for each issue. ALL completed issues from the same Epic collapse into a single bullet. This is an executive summary — the Epic is the unit, not the individual issue.
-   - Analysis Rule: For each Epic group, write 1-2 sentences explaining the overall VALUE delivered to users or stakeholders this sprint. The narrative is informed by ALL completed issues in that Epic group combined. Do not list each issue's details separately — synthesize them into a single executive message.
-   - Issue Listing: After the achievement summary, list ALL Task IDs from that Epic group as reference only.
-   - Format: [Epic name]: [Executive summary of overall value delivered — 1-2 sentences synthesizing all completed issues] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
+   - Grouping Rule: Group completed issues by Epic. Use the Epic's TITLE (summary text) as the group label — NEVER the Epic's issue ID (e.g. write "Digital Identity Platform", not "DID-12345"). If an issue has no Epic, group under "General Improvements".
+   - ONE BULLET PER EPIC GROUP: Do NOT create a separate bullet for each issue. ALL completed issues from the same Epic collapse into a single bullet. The Epic title is the unit.
+   - Analysis Rule: For each Epic group, write 1-2 sentences describing the overall VALUE delivered to users or stakeholders this sprint. Read the summaries, descriptions and comments of ALL completed issues in that group and synthesize the business outcome — do not list each issue separately.
+   - Issue Listing: After the summary, list only the IDs of the completed issues included in that group (main types only, no sub-tasks).
+   - Format: [Epic Title]: [1-2 sentence business value summary] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
 
 
 For Key Technical Goals Achieved (DONE issues only - Work Category: Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps):
    - Status Filter: ONLY include issues in Done / Closed / Resolved. SKIP any issue not in these statuses.
    - Sub-task Filter: NEVER include sub-task issue types. Use sub-task data only to enrich the parent issue analysis.
-   - Grouping Rule: Group by Epic or Component. If no Epic, group under the relevant technical area.
-   - ONE BULLET PER EPIC/COMPONENT GROUP: Do NOT create a separate bullet for each issue. ALL completed issues from the same Epic or component collapse into a single bullet. This is an executive summary — the group is the unit, not the individual issue.
-   - Analysis Rule: For each group, write 1-2 sentences summarizing the overall technical capability enabled, risk reduced, or quality improvement achieved — synthesizing ALL completed issues in that group. Do not enumerate each issue individually.
-   - Issue Listing: After the analysis summary, list ALL Task IDs from that group as reference only.
-   - Format: [Epic/Component name]: [Executive summary of overall technical value delivered — 1-2 sentences synthesizing all completed issues] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
+   - Grouping Rule: Group completed issues by Epic. Use the Epic's TITLE (summary text) as the group label — NEVER the Epic's issue ID. If no Epic, group under the relevant technical area (e.g. "Infrastructure", "Quality", "Support Operations").
+   - ONE BULLET PER EPIC GROUP: Do NOT create a separate bullet for each issue. ALL completed issues from the same Epic collapse into a single bullet. The Epic title is the unit.
+   - Analysis Rule: For each Epic group, write 1-2 sentences describing the overall technical capability enabled, risk reduced, or quality improvement achieved. Read the summaries, descriptions and comments of ALL completed issues in that group and synthesize — do not enumerate each issue individually.
+   - Issue Listing: After the summary, list only the IDs of the completed issues included in that group (main types only, no sub-tasks).
+   - Format: [Epic Title]: [1-2 sentence technical value summary] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
 
 
 For Major Struggles Needing Escalation (incomplete main issues only - no sub-tasks, no tests):
-   - Scope: List EVERY main issue (Story, Task, Bug, Request Support, etc.) from the sprint JQL results whose status is NOT Done/Closed/Resolved. Sub-task and Test types excluded. EVERY incomplete issue MUST appear here — do not omit any.
-   - Priority 1 - IMMEDIATE ESCALATION: Status = Blocked / Waiting / On Hold → requires immediate management action.
-   - Priority 2 - ESCALATION CANDIDATE: Status = In Progress / In Development / Review / To Test AND comments confirm explicit blocker signals → needs escalation.
-   - Priority 3 - NEEDS REVIEW: All other incomplete issues (To Do, Open, or active status without explicit blockers) → sprint ended without completing them; must be reviewed for re-planning or escalation if there is a delivery commitment at risk.
-   - For each item: read comments to enrich the description, then write (a) delivery risk, (b) concrete next step, (c) owner, ask, recommended due date. For Priority 3 items without explicit blockers, note they were not finished and should be re-planned or reviewed.
-   - Format: [Issue description and delivery risk] - Owner: [Name], Ask: [Specific action], Due: [Date] ([ISSUE-ID] - [WORK-CATEGORY])
+   - Scope: EVERY main issue (Story, Task, Bug, Request Support, etc.) from the sprint JQL results whose status is NOT Done/Closed/Resolved MUST appear in this section. Do not omit any incomplete issue.
+   - For each incomplete issue, read its comments and activity history to determine the situation, then classify:
+       * IMMEDIATE ESCALATION: Status is Blocked / Waiting / On Hold, OR comments explicitly mention a blocker, dependency blocked, or waiting for external action → requires management action now. Write the blocker, owner, specific ask, and due date.
+       * NEEDS REVIEW: Status is In Progress / In Development / Review / To Test / To Do / Open with no explicit blocker found in comments → the sprint ended without completing it. Mention this and suggest it be re-planned for the next sprint or escalated if there is a delivery commitment at risk. Write owner and suggested next step.
+   - Format for IMMEDIATE ESCALATION: [Issue summary] — Blocker: [what is blocking it] - Owner: [Name], Ask: [Specific action needed], Due: [Date] ([ISSUE-ID] - [WORK-CATEGORY])
+   - Format for NEEDS REVIEW: [Issue summary] — Sprint ended without completion. Suggest: [re-plan for next sprint / review with owner]. Owner: [Name] ([ISSUE-ID] - [WORK-CATEGORY])
    - Only write "No major struggles" if EVERY sprint issue is in Done/Closed/Resolved status.
 
 ## GLOBAL HARD FILTERS (NON-NEGOTIABLE):
