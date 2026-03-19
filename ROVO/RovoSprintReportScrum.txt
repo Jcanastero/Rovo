@@ -93,11 +93,14 @@ If an issue has issue type "Sub-task" (or any variant of sub-task type), you MUS
 - Do NOT include Sub-task issues in the list "Issues without Work Category".
 Only main issue types (e.g., Story, Task, Bug, Documentation, Improvement, Epic, etc.) must be analyzed and reported.
 
-HIERARCHY DEPTH FILTER (Direct Epic children only — MANDATORY):
-Only include issues that are DIRECT children of an Epic, OR standalone issues with no parent (issues where the "Parent" field is empty or points to an Epic).
-If an issue's "Parent" field points to a Story, Task, Bug, or ANY non-Epic issue type, that issue is a GRANDCHILD in the Jira hierarchy — EXCLUDE it from ALL report sections (Key Goals Achieved, Key Technical Goals Achieved, Major Struggles Needing Escalation, and Issues without Work Category).
-You may read a grandchild issue's data to enrich understanding of its parent, but NEVER list it, reference its ID, or count it in any section of the final report.
-How to check: Examine the "Parent" or "Parent Link" field of each issue. If the parent's issue type is NOT "Epic" (or if it has no parent link at all in the Epic field), treat it as a grandchild and skip it.
+HIERARCHY DEPTH FILTER (applies to Goals and Work Category list only — NOT to Major Struggles):
+For "Key Goals Achieved", "Key Technical Goals Achieved", and "Issues without Work Category":
+  - Only include issues that are DIRECT children of an Epic, OR standalone issues with no parent.
+  - If an issue's "Parent" field points to a Story, Task, Bug, or ANY non-Epic issue type, that issue is a GRANDCHILD — EXCLUDE it from these three sections.
+  - You may read a grandchild issue's data to enrich understanding of its parent, but NEVER list it or reference its ID in Key Goals, Key Technical Goals, or Issues without Work Category.
+  - How to check: Examine the "Parent" or "Parent Link" field. If the parent's issue type is NOT "Epic", it is a grandchild for Goals purposes — skip it in these sections.
+For "Major Struggles Needing Escalation":
+  - The hierarchy depth filter does NOT apply. Evaluate ALL non-completed issues returned by the sprint JQL query, regardless of whether they are direct Epic children or grandchildren. If an incomplete issue is in the sprint, it must be evaluated for escalation.
 
 A. Task State Classification:
 COMPLETED (Done, Closed, Resolved): ELIGIBLE for "Key Goals Achieved" and "Key Technical Goals Achieved" sections ONLY.
@@ -215,7 +218,7 @@ For Major Struggles Needing Escalation (incomplete main issues only - no sub-tas
 
 ## GLOBAL HARD FILTERS (NON-NEGOTIABLE):
 - You MUST NEVER mention, list, or output any issue whose Jira Issue Type is "Sub-task" (or any sub-task variant) in ANY section of the final report. Sub-tasks are ONLY context for their parent issues.
-- You MUST NEVER include any issue whose parent is a non-Epic issue type (e.g., parent is a Story, Task, Bug, etc.). Only DIRECT children of Epics — or issues with no parent — are reportable. Grandchild issues (children of children of Epics) are EXCLUDED from every section of the report.
+- You MUST NEVER include grandchild issues (issues whose parent is a Story, Task, Bug, or any non-Epic type) in "Key Goals Achieved", "Key Technical Goals Achieved", or "Issues without Work Category". EXCEPTION: grandchild issues that are NOT completed (status != Done/Closed/Resolved) MUST still be evaluated for "Major Struggles Needing Escalation" — incomplete issues of any hierarchy depth must be escalated if they represent a delivery risk.
 - You MUST NEVER include any issue whose 'WORK CATEGORY' is "Risk Management" in the "Key Goals Achieved" or "Key Technical Goals Achieved" sections. "Risk Management" is not an allowed category for achievements.
 
 
