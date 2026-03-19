@@ -20,12 +20,27 @@ Board ID: {{boardId}}
 Sprint ID: {{sprintId}}
 
 BURNDOWN ID RESOLUTION (MANDATORY — execute during report generation):
-Step 1 - Resolve Board ID: Use your Jira tools to search for boards associated with {{projectKey}}. Select the board whose project key exactly matches {{projectKey}}. Extract the numeric board ID → this is REAL_BOARD_ID.
-Step 2 - Resolve Sprint ID: Using REAL_BOARD_ID, search for sprints in that board. Find the sprint whose name exactly matches {{sprintName}}. Extract the numeric sprint ID → this is REAL_SPRINT_ID.
-Step 3 - Build URL:
-  IF both REAL_BOARD_ID and REAL_SPRINT_ID were found: use them directly in the burndown URL.
-  IF they could NOT be resolved: DO NOT write a URL with placeholders. Instead write: "Burndown Chart: Could not automatically resolve Board ID or Sprint ID. To view manually: In Jira, go to your project > Board > Reports > Burndown Chart and select sprint {{sprintName}}."
-STRICT PROHIBITION: NEVER write {{boardId}} or {{sprintId}} as literal text in the final report URL. NEVER use IDs from a different project than {{projectKey}}. NEVER invent or guess numeric IDs.
+
+Step 1 - Get Board ID:
+  a) IF {{boardId}} is provided and is a plain number (not placeholder text like "{{boardId}}") → use it directly as REAL_BOARD_ID. Skip tool lookup.
+  b) IF {{boardId}} is empty or contains placeholder text → search for boards associated with {{projectKey}} using your Jira tools. From the results, select the board whose project key exactly matches {{projectKey}}. Extract the numeric board ID → REAL_BOARD_ID.
+  c) IF the board search returns no match → set REAL_BOARD_ID = NOT_FOUND.
+
+Step 2 - Get Sprint ID:
+  a) IF {{sprintId}} is provided and is a plain number → use it directly as REAL_SPRINT_ID. Skip tool lookup.
+  b) IF {{sprintId}} is empty or contains placeholder text AND REAL_BOARD_ID was found → search sprints in that board, find the sprint whose name exactly matches {{sprintName}}, extract numeric sprint ID → REAL_SPRINT_ID.
+  c) IF sprint search returns no match → set REAL_SPRINT_ID = NOT_FOUND.
+
+Step 3 - Build Burndown URL:
+  IF both REAL_BOARD_ID and REAL_SPRINT_ID are valid numbers:
+    Try company-managed format first:
+    https://appgateinc.atlassian.net/jira/software/c/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown-chart?sprint=[REAL_SPRINT_ID]
+    Also provide team-managed format as alternative:
+    https://appgateinc.atlassian.net/jira/software/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown?sprint=[REAL_SPRINT_ID]
+  IF either ID could NOT be resolved:
+    Write exactly: "Burndown Chart: IDs could not be resolved automatically. To view manually: In Jira, open project [ACTUAL_KEY] → Board → Reports → Burndown Chart → select sprint [ACTUAL_SPRINT_NAME]."
+
+STRICT PROHIBITION: NEVER write {{boardId}}, {{sprintId}}, {{projectKey}}, or any other placeholder text in the final report URL. NEVER invent or guess numeric IDs. Replace [ACTUAL_KEY] and [ACTUAL_SPRINT_NAME] with the real values from the parameters.
 
 Parameter Priority Rule
 EXACT MATCH ONLY: When executing JQL or searching for Boards/Sprints, you MUST use the exact string provided in {{projectKey}}.
@@ -76,10 +91,9 @@ Important Permission Note: Jira issues are only visible according to the current
 
 Locate Burndown Data:
 - Execute the BURNDOWN ID RESOLUTION steps defined above (Step 1, Step 2, Step 3).
-- Use REAL_BOARD_ID and REAL_SPRINT_ID obtained from your tools to build the burndown URL.
-- The burndown URL format is: https://appgateinc.atlassian.net/jira/software/c/projects/{{projectKey}}/boards/REAL_BOARD_ID/reports/burndown-chart?sprint=REAL_SPRINT_ID
-- Replace {{projectKey}} with the actual project key value, and REAL_BOARD_ID / REAL_SPRINT_ID with the numeric values found via tools.
-- If IDs cannot be resolved: show the manual navigation message defined in Step 3 above. NEVER output a URL containing literal placeholder text.
+- If {{boardId}} and {{sprintId}} are provided as numeric values, use them directly — no tool lookup needed.
+- If they are empty or placeholder text, use your Jira tools to resolve them as described in Step 1 and Step 2.
+- Build the URL using the resolved values. NEVER output a URL containing placeholder text like {{boardId}}, {{sprintId}}, or {{projectKey}}.
 
 
 ## DETAILED TASK ANALYSIS METHODOLOGY:
@@ -274,15 +288,16 @@ Issues without Work Category:
 Note: If all issues have a Work Category assigned, write: “All issues have Work Category assigned.”
 
 Burndown Chart:
-Using the REAL_BOARD_ID and REAL_SPRINT_ID resolved during report generation (see BURNDOWN ID RESOLUTION steps above):
+[Use the REAL_BOARD_ID and REAL_SPRINT_ID resolved in the BURNDOWN ID RESOLUTION steps above.]
 
-IF IDs were resolved successfully:
-https://appgateinc.atlassian.net/jira/software/c/projects/[ACTUAL_PROJECT_KEY]/boards/[ACTUAL_BOARD_ID]/reports/burndown-chart?sprint=[ACTUAL_SPRINT_ID]
-
-Replace [ACTUAL_PROJECT_KEY], [ACTUAL_BOARD_ID] and [ACTUAL_SPRINT_ID] with the real values — NEVER write placeholder text like {{projectKey}}, {{boardId}}, or {{sprintId}} in the final URL.
+IF IDs were resolved:
+  Company-managed projects: https://appgateinc.atlassian.net/jira/software/c/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown-chart?sprint=[REAL_SPRINT_ID]
+  Team-managed projects:    https://appgateinc.atlassian.net/jira/software/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown?sprint=[REAL_SPRINT_ID]
 
 IF IDs could NOT be resolved:
-"Burndown Chart: Could not automatically resolve Board ID or Sprint ID for project [ACTUAL_PROJECT_KEY]. To view manually: In Jira, navigate to your project > Board > Reports > Burndown Chart and select sprint [ACTUAL_SPRINT_NAME]."
+  Burndown Chart: IDs could not be resolved automatically. To view manually: In Jira, open project [ACTUAL_KEY] → Board → Reports → Burndown Chart → select sprint [ACTUAL_SPRINT_NAME].
+
+[Brief description of the sprint trend based on the data retrieved: e.g. whether the team burned down steadily, had a late rush, or left work incomplete.]
 
 
 
