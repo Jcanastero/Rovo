@@ -87,11 +87,11 @@ Locate Burndown Data:
 Step 1: Individual Task Examination
 For EACH task returned by the JQL query, perform this detailed analysis:
 Issue Type Filtering Rule (Main tasks only):
-If an issue has issue type "Sub-task" (or any variant of sub-task type), you MUST NOT treat it as an individual task for analysis or reporting. Use sub-tasks ONLY as context to understand their parent issue (by reading the "Sub-tasks" or related fields), but:
-- Do NOT classify Sub-task issues as "Key Goals Achieved", "Key Technical Goals Achieved", or "Major Struggles Needing Escalation".
-- Do NOT include Sub-task issue IDs in any bullet, list, or section of the final report.
-- Do NOT include Sub-task issues in the list "Issues without Work Category".
-Only main issue types (e.g., Story, Task, Bug, Documentation, Improvement, Epic, etc.) must be analyzed and reported.
+The following issue types are EXCLUDED from ALL sections of the report (Key Goals Achieved, Key Technical Goals Achieved, Major Struggles Needing Escalation, and Issues without Work Category):
+  - Sub-task (and all sub-task variants: Sub Test, Sub Test Execution, Technical task subordinate, etc.)
+  - Test (issue type = "Test", "Test Case", "Test Execution", "Sub Test Execution", or any testing-framework issue type)
+These excluded types may only be used as context to understand their parent issue, but their IDs must NEVER appear in the report.
+Only main issue types (e.g., Story, Task, Bug, Documentation, Improvement, Epic, Request Support, etc.) must be analyzed and reported.
 
 HIERARCHY DEPTH FILTER (applies to Goals and Work Category list only — NOT to Major Struggles):
 For "Key Goals Achieved", "Key Technical Goals Achieved", and "Issues without Work Category":
@@ -230,7 +230,7 @@ Key Technical Goals Achieved: Bullet points following the specified format.
 Burndown Chart (Visual & Link): Provide a brief description of the trend.
 OUTPUT ONLY the sprint report below - no methodology or analysis process.
 Answer ONLY in English.
-Generate EXACTLY the 4 sections specified below (2-6 bullets per section).
+Generate EXACTLY the 5 sections specified below: Key Goals Achieved (2-6 bullets), Key Technical Goals Achieved (2-6 bullets), Major Struggles Needing Escalation, Issues without Work Category, and Burndown Chart.
 
 
 ## SPRINT COMPLETION REPORT - DEVELOPMENT LEADER
@@ -255,6 +255,12 @@ Major Struggles Needing Escalation:
 [Issue description and business impact] - Owner: [Name], Ask: [Action needed], Due: [Date] ([TASK-ID])
 
 Note: If no blockers exist, write: “No major struggles requiring management escalation at this time.”
+
+Issues without Work Category:
+[ISSUE-ID] - empty
+[ISSUE-ID] - empty
+
+Note: If all issues have a Work Category assigned, write: “All issues have Work Category assigned.”
 
 Burndown Chart:
 Using the REAL_BOARD_ID and REAL_SPRINT_ID resolved during report generation (see BURNDOWN ID RESOLUTION steps above):
