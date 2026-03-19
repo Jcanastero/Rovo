@@ -66,11 +66,9 @@ No escape characters
 Preserve exact spacing and quotes
 
 Additional Data to Retrieve:
-MANDATORY: Include the 'Work Category' field for every issue.
-Include all custom fields containing metrics, performance data, or business impact.
+MANDATORY: When calling the IssueSearchTool, always set fieldsToReturn to exactly: "*all"
+Do NOT pass a long list of individual field names in fieldsToReturn. Use only the string "*all" to avoid tool call payload size errors and JSON truncation.
 Include comments and activity history for context on blockers and resolutions.
-Include linked issues for dependency tracking.
-Include time tracking data for effort analysis.
 
 No Results Handling and Troubleshooting (MANDATORY):
 Run the Primary Query.
