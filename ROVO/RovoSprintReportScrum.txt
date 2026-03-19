@@ -95,14 +95,17 @@ Only main issue types (e.g., Story, Task, Bug, Documentation, Improvement, Epic,
 
 HIERARCHY DEPTH FILTER (applies to Goals and Work Category list only — NOT to Major Struggles):
 For "Key Goals Achieved", "Key Technical Goals Achieved", and "Issues without Work Category":
-  - After retrieving all sprint issues via JQL, build the list of issue keys returned (e.g. DID-100, DID-200, etc.).
-  - For each issue, check its "Parent" or "Parent Link" field to get the parent issue key.
-  - GRANDCHILD RULE: If the parent key of an issue IS itself in your sprint issue list, then this issue is a grandchild (its parent is a Story/Task/Bug in the sprint, not an Epic). EXCLUDE it from Key Goals, Key Technical Goals, and Issues without Work Category.
-  - DIRECT CHILD RULE: If the parent key is NOT in your sprint issue list (or there is no parent), the issue is a direct Epic child or standalone. INCLUDE it in these sections (subject to status and Work Category rules).
-  - You may read a grandchild issue's data to enrich understanding of its parent, but NEVER list its ID in Goals sections.
-  - Rationale: Epics are not assigned to sprints as active issues, so a parent that appears in the sprint results is always a Story/Task/Bug — making the child a grandchild of the Epic.
+  - Goal: include only issues that are direct children of an Epic. Exclude issues that are children of other Stories/Tasks (grandchildren of the Epic).
+  - Step 1: Build the full list of issue keys returned by the sprint JQL (e.g. DID-100, DID-200, ...).
+  - Step 2: For each issue, look up its "Parent" field value (the parent issue key).
+  - Step 3: Check the issue TYPE of that parent:
+      * If the parent's issue type is "Epic" → this issue is a DIRECT EPIC CHILD → INCLUDE in Goals.
+      * If the parent's issue type is "Story", "Task", "Bug", or any non-Epic main type → this issue is a GRANDCHILD → EXCLUDE from Goals.
+      * If there is no parent at all → standalone issue → INCLUDE in Goals.
+  - IMPORTANT: Do NOT rely solely on whether the parent key appears in the sprint list. You MUST confirm the parent's issue type. If you cannot determine the parent type, default to INCLUDE (do not exclude on uncertainty).
+  - You may read a grandchild issue's data to enrich the parent's entry, but NEVER list its ID in Goals sections.
 For "Major Struggles Needing Escalation":
-  - The hierarchy depth filter does NOT apply. Evaluate ALL non-completed issues returned by the sprint JQL query, regardless of hierarchy depth. If an incomplete issue is in the sprint, evaluate it for escalation.
+  - The hierarchy depth filter does NOT apply. Evaluate ALL non-completed issues returned by the sprint JQL query, regardless of hierarchy depth.
 
 A. Task State Classification:
 COMPLETED (Done, Closed, Resolved): ELIGIBLE for "Key Goals Achieved" and "Key Technical Goals Achieved" sections ONLY.
@@ -152,11 +155,12 @@ Classify as "Key Technical Goals Achieved" if ALL of the following are true:
 Mandatory Exclusion: DO NOT include tasks with any other Work Category, tasks with empty Work Category, tasks NOT in Done/Closed/Resolved status, or sub-task issue types. Tasks where the 'WORK CATEGORY' field is empty must be mentioned in a separate list after the analysis, using the format: [ISSUE-ID] - empty.
 
 Classify as "Major Struggles Needing Escalation" — evaluate ALL main issues (no sub-tasks) that were NOT completed during the sprint using this priority:
+  CLOSED SPRINT RULE (OVERRIDES ALL): If the sprint has already ended (sprint status = Closed), ANY issue that is NOT in Done/Closed/Resolved status is AUTOMATICALLY an escalation candidate — regardless of whether explicit blockers appear in comments. A closed sprint with incomplete issues IS the escalation signal. Do not skip these issues.
   PRIORITY 1 — IMMEDIATE ESCALATION: Status is Blocked, Waiting, or On Hold.
-  PRIORITY 2 — ESCALATION CANDIDATE: Status is In Progress, In Development, Review, To Test, or To review & Approval — read comments and activity history to identify: explicit blockers mentioned, requests for help, missed deadlines, dependency delays, or risk signals.
-  PRIORITY 3 — MONITOR: Status is To Do or Open but the issue was worked on during the sprint (has comments or activity) — review comments for context.
-  EXCLUDE: Issues with no sprint activity and no comments. EXCLUDE all sub-task issue types.
-For each escalation candidate: suggest a concrete action plan based on the comments and current status. Identify owner, specific ask, and recommended due date.
+  PRIORITY 2 — ESCALATION CANDIDATE: Status is In Progress, In Development, Review, To Test, or To review & Approval.
+  PRIORITY 3 — MONITOR: Status is To Do or Open.
+  EXCLUDE only: sub-task issue types and Test issue types. Do NOT exclude based on absence of comments.
+For each escalation candidate: read comments and activity to understand current state, then (a) describe the delivery risk (sprint ended without completing it), (b) suggest a concrete next step, (c) identify owner, specific ask, and recommended due date.
 
 IMPORTANT CLARIFICATION ON RISK CATEGORIES:
 - "Risk Mitigation" is an allowed WORK CATEGORY only for "Key Technical Goals Achieved".
@@ -220,7 +224,7 @@ For Major Struggles Needing Escalation (incomplete main issues only - no sub-tas
 
 ## GLOBAL HARD FILTERS (NON-NEGOTIABLE):
 - You MUST NEVER mention, list, or output any issue whose Jira Issue Type is "Sub-task" (or any sub-task variant) in ANY section of the final report. Sub-tasks are ONLY context for their parent issues.
-- You MUST NEVER include grandchild issues in "Key Goals Achieved", "Key Technical Goals Achieved", or "Issues without Work Category". A grandchild is an issue whose parent key also appears in the sprint JQL results (meaning the parent is a Story/Task/Bug in the sprint, not an Epic). EXCEPTION: grandchild issues that are NOT completed MUST still be evaluated for "Major Struggles Needing Escalation" — incomplete issues of any hierarchy depth must be escalated if they represent a delivery risk.
+- You MUST NEVER include grandchild issues in "Key Goals Achieved", "Key Technical Goals Achieved", or "Issues without Work Category". A grandchild is an issue whose parent's issue TYPE is a Story, Task, Bug, or any non-Epic type (verify the parent's type, do not just check if the parent key is in the sprint list). If the parent type cannot be determined, default to INCLUDE. EXCEPTION: grandchild issues that are NOT completed MUST still be evaluated for "Major Struggles Needing Escalation".
 - You MUST NEVER include any issue whose 'WORK CATEGORY' is "Risk Management" in the "Key Goals Achieved" or "Key Technical Goals Achieved" sections. "Risk Management" is not an allowed category for achievements.
 
 
