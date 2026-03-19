@@ -165,7 +165,12 @@ For each escalation candidate: read comments and activity to understand current 
 IMPORTANT CLARIFICATION ON RISK CATEGORIES:
 - "Risk Mitigation" is an allowed WORK CATEGORY only for "Key Technical Goals Achieved".
 
-Additionally, after performing all classifications above, generate a separate list named "Issues without Work Category", containing every task whose 'WORK CATEGORY' field is empty, using the format: [ISSUE-ID] - empty.
+Additionally, after performing all classifications above, generate a separate list named "Issues without Work Category". This list MUST follow ALL of these constraints:
+  1. SPRINT SCOPE ONLY: Only include issues that were returned by the sprint JQL query. Do NOT include issues from outside the sprint.
+  2. MAIN TYPES ONLY: Exclude Sub-task, Test, Test Case, Test Execution, and all sub-task/test variants.
+  3. HIERARCHY FILTER: Apply the same hierarchy depth filter — only direct Epic children (or standalone issues with no parent). Grandchild issues are excluded.
+  4. EMPTY WORK CATEGORY: Only include issues where the 'Work Category' field is empty or missing.
+  Format for each entry: [ISSUE-ID] - empty
 
 STRICT SEPARATION OF BUSINESS VS TECH CATEGORIES:
 - The following WORK CATEGORY values are RESERVED EXCLUSIVELY for "Key Goals Achieved" (business goals) and MUST NEVER appear under "Key Technical Goals Achieved":
@@ -212,15 +217,15 @@ For Key Technical Goals Achieved (DONE issues only - Work Category: Enabler, Tec
    - Format: [Epic/Component name]: [Technical achievement summary - capability/risk/quality impact] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
 
 
-For Major Struggles Needing Escalation (incomplete main issues only - no sub-tasks):
-   - Scope: Evaluate ALL main issues (Story, Task, Bug, etc.) that were NOT completed (status != Done/Closed/Resolved).
-   - Sub-task Filter: NEVER include sub-task issue types.
-   - Priority 1 - IMMEDIATE: Status = Blocked / Waiting / On Hold - always include.
-   - Priority 2 - CANDIDATE: Status = In Progress / In Development / Review / To Test - read comments for blocker signals, missed deadlines, cross-team dependencies, or explicit risk mentions.
-   - Priority 3 - MONITOR: Status = To Do / Open with sprint activity - read comments for context.
-   - For each escalation item: (a) describe the business/delivery risk, (b) suggest a concrete action plan based on comments and current state, (c) identify owner, specific ask, and recommended due date.
-   - Format: [Issue description and business impact] - Owner: [Name], Ask: [Specific action], Due: [Date] ([ISSUE-ID] - [WORK-CATEGORY])
-   - If no escalation candidates exist: write "No major struggles requiring management escalation at this time."
+For Major Struggles Needing Escalation (incomplete main issues only - no sub-tasks, no tests):
+   - CLOSED SPRINT OVERRIDE: This sprint is CLOSED. Every issue in the sprint that is NOT Done/Closed/Resolved MUST appear here. No exceptions. Do not require blocker signals. The sprint ended without completing them — that IS the escalation.
+   - Scope: List EVERY main issue (Story, Task, Bug, Request Support, etc.) from the sprint JQL results whose status is NOT Done/Closed/Resolved. Sub-task and Test types excluded.
+   - Priority 1 - IMMEDIATE: Status = Blocked / Waiting / On Hold.
+   - Priority 2 - CANDIDATE: Status = In Progress / In Development / Review / To Test. ALWAYS include regardless of whether comments mention blockers.
+   - Priority 3 - MONITOR: Status = To Do / Open.
+   - For each item: read comments to enrich the description, then write (a) delivery risk, (b) concrete next step, (c) owner, ask, recommended due date.
+   - Format: [Issue description and delivery risk] - Owner: [Name], Ask: [Specific action], Due: [Date] ([ISSUE-ID] - [WORK-CATEGORY])
+   - Only write "No major struggles" if EVERY sprint issue is in Done/Closed/Resolved status.
 
 ## GLOBAL HARD FILTERS (NON-NEGOTIABLE):
 - You MUST NEVER mention, list, or output any issue whose Jira Issue Type is "Sub-task" (or any sub-task variant) in ANY section of the final report. Sub-tasks are ONLY context for their parent issues.
