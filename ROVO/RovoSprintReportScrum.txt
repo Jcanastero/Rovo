@@ -121,9 +121,11 @@ C. Business vs. Technical Classification Decision Tree:
 IMPORTANT: When referring to 'WORK CATEGORY', always use the EXACT value of the Jira custom field named "Work Category" on each issue.
 Never invent, infer, or guess a work category from the summary, description, labels, components, or issue type. If the Jira "Work Category" field is empty or missing, treat it as "no work category" following the rules below.
 
+⚠️ ABSOLUTE RULE FOR GOALS SECTIONS: An issue may ONLY appear in "Key Goals Achieved" or "Key Technical Goals Achieved" if its status is DONE, Closed, or Resolved. Issues that are In Progress, Open, To Do, Blocked, On Hold, In Development, Review, or any other non-final status are STRICTLY FORBIDDEN in Goals sections. These go to Major Struggles instead — never to Goals.
+
 Classify as "Key Goals Achieved" if ALL of the following are true:
-  1. STATUS = DONE / Closed / Resolved (mandatory — incomplete issues are EXCLUDED)
-  2. Issue type is a main type (Story, Task, Bug, etc.) — sub-tasks EXCLUDED
+  1. STATUS = DONE / Closed / Resolved (mandatory — incomplete issues are EXCLUDED WITHOUT EXCEPTION)
+  2. Issue type is a main type (Story, Task, Bug, Documentation, Improvement, etc.) — sub-tasks EXCLUDED. NOTE: Bugs that are direct children of an Epic are main issues and MUST be included if completed.
   3. Work Category is exactly one of:
      - Client Services
      - Product:Feature
@@ -139,8 +141,8 @@ Mandatory Exclusion: DO NOT include tasks with any other Work Category, tasks wi
 Tasks where the 'WORK CATEGORY' field is empty must be mentioned in a separate list after the analysis, using the format: [ISSUE-ID] - empty
 
 Classify as "Key Technical Goals Achieved" if ALL of the following are true:
-  1. STATUS = DONE / Closed / Resolved (mandatory — incomplete issues are EXCLUDED)
-  2. Issue type is a main type (Story, Task, Bug, etc.) — sub-tasks EXCLUDED
+  1. STATUS = DONE / Closed / Resolved (mandatory — incomplete issues are EXCLUDED WITHOUT EXCEPTION)
+  2. Issue type is a main type (Story, Task, Bug, Documentation, Improvement, etc.) — sub-tasks EXCLUDED. NOTE: Bugs that are direct children of an Epic are main issues and MUST be included if completed.
   3. Work Category is exactly one of:
      - Enabler
      - Technical Debt
@@ -152,13 +154,21 @@ Classify as "Key Technical Goals Achieved" if ALL of the following are true:
      - SysOps/DevOps
 Mandatory Exclusion: DO NOT include tasks with any other Work Category, tasks with empty Work Category, tasks NOT in Done/Closed/Resolved status, or sub-task issue types. Tasks where the 'WORK CATEGORY' field is empty must be mentioned in a separate list after the analysis, using the format: [ISSUE-ID] - empty.
 
-Classify as "Major Struggles Needing Escalation" — evaluate ALL main issues (no sub-tasks) that were NOT completed during the sprint using this priority:
-  CLOSED SPRINT RULE (OVERRIDES ALL): If the sprint has already ended (sprint status = Closed), ANY issue that is NOT in Done/Closed/Resolved status is AUTOMATICALLY an escalation candidate — regardless of whether explicit blockers appear in comments. A closed sprint with incomplete issues IS the escalation signal. Do not skip these issues.
-  PRIORITY 1 — IMMEDIATE ESCALATION: Status is Blocked, Waiting, or On Hold.
-  PRIORITY 2 — ESCALATION CANDIDATE: Status is In Progress, In Development, Review, To Test, or To review & Approval.
-  PRIORITY 3 — MONITOR: Status is To Do or Open.
-  EXCLUDE only: sub-task issue types and Test issue types. Do NOT exclude based on absence of comments.
-For each escalation candidate: read comments and activity to understand current state, then (a) describe the delivery risk (sprint ended without completing it), (b) suggest a concrete next step, (c) identify owner, specific ask, and recommended due date.
+Classify as "Major Struggles Needing Escalation" — evaluate ALL main issues (no sub-tasks, no Test types) that are NOT in Done/Closed/Resolved status. Every incomplete main issue MUST appear in this section. NEVER omit an incomplete issue from this section. Classify each one using this priority:
+
+  PRIORITY 1 — IMMEDIATE ESCALATION: Status is Blocked, Waiting, or On Hold. These are hard blockers and require management action now.
+
+  PRIORITY 2 — ESCALATION CANDIDATE: Status is In Progress, In Development, Review, To Test, or To review & Approval AND comments or activity show explicit blocker signals (dependency blocked, waiting for external party, technical impediment, missed deadline mentioned). Read comments carefully to confirm the signal.
+
+  PRIORITY 3 — NEEDS REVIEW: Any other incomplete issue — including To Do, Open, or active-status issues with no explicit blocker signals in comments. The sprint ended without completing them. These must be reviewed: either re-planned for the next sprint or escalated if there is a delivery commitment at risk.
+
+  EXCLUDE only: sub-task issue types and Test issue types.
+
+For each issue: read comments and activity to understand current state, then write:
+  (a) delivery risk — what it means that this was not completed
+  (b) concrete next step — specific action to resolve or re-plan
+  (c) owner, specific ask, and recommended due date
+  For Priority 3: if no explicit blocker is found, note that the item was not finished and should be reviewed for re-planning or escalation.
 
 IMPORTANT CLARIFICATION ON RISK CATEGORIES:
 - "Risk Mitigation" is an allowed WORK CATEGORY only for "Key Technical Goals Achieved".
@@ -218,12 +228,11 @@ For Key Technical Goals Achieved (DONE issues only - Work Category: Enabler, Tec
 
 
 For Major Struggles Needing Escalation (incomplete main issues only - no sub-tasks, no tests):
-   - CLOSED SPRINT OVERRIDE: This sprint is CLOSED. Every issue in the sprint that is NOT Done/Closed/Resolved MUST appear here. No exceptions. Do not require blocker signals. The sprint ended without completing them — that IS the escalation.
-   - Scope: List EVERY main issue (Story, Task, Bug, Request Support, etc.) from the sprint JQL results whose status is NOT Done/Closed/Resolved. Sub-task and Test types excluded.
-   - Priority 1 - IMMEDIATE: Status = Blocked / Waiting / On Hold.
-   - Priority 2 - CANDIDATE: Status = In Progress / In Development / Review / To Test. ALWAYS include regardless of whether comments mention blockers.
-   - Priority 3 - MONITOR: Status = To Do / Open.
-   - For each item: read comments to enrich the description, then write (a) delivery risk, (b) concrete next step, (c) owner, ask, recommended due date.
+   - Scope: List EVERY main issue (Story, Task, Bug, Request Support, etc.) from the sprint JQL results whose status is NOT Done/Closed/Resolved. Sub-task and Test types excluded. EVERY incomplete issue MUST appear here — do not omit any.
+   - Priority 1 - IMMEDIATE ESCALATION: Status = Blocked / Waiting / On Hold → requires immediate management action.
+   - Priority 2 - ESCALATION CANDIDATE: Status = In Progress / In Development / Review / To Test AND comments confirm explicit blocker signals → needs escalation.
+   - Priority 3 - NEEDS REVIEW: All other incomplete issues (To Do, Open, or active status without explicit blockers) → sprint ended without completing them; must be reviewed for re-planning or escalation if there is a delivery commitment at risk.
+   - For each item: read comments to enrich the description, then write (a) delivery risk, (b) concrete next step, (c) owner, ask, recommended due date. For Priority 3 items without explicit blockers, note they were not finished and should be re-planned or reviewed.
    - Format: [Issue description and delivery risk] - Owner: [Name], Ask: [Specific action], Due: [Date] ([ISSUE-ID] - [WORK-CATEGORY])
    - Only write "No major struggles" if EVERY sprint issue is in Done/Closed/Resolved status.
 
@@ -277,7 +286,14 @@ STEP C4 — FORBIDDEN CONCLUSION:
 NEVER write "No major struggles requiring management escalation at this time" unless INCOMPLETE_COUNT = 0.
 If INCOMPLETE_COUNT > 0, you MUST list every incomplete main issue in Major Struggles Needing Escalation.
 
-DO NOT write the final report output until every item has passed validations A, B, and C.
+--- VALIDATION D: COMPLETED-ONLY IN GOALS (CRITICAL) ---
+For EVERY issue listed in "Key Goals Achieved" or "Key Technical Goals Achieved":
+  - Look up its status field value.
+  - If status is NOT Done, Closed, or Resolved → REMOVE it from the Goals section immediately.
+  - Move it to "Major Struggles Needing Escalation" instead.
+  - This check is non-negotiable. In-Progress, Review, To Test, To Do, Blocked, On Hold issues MUST NEVER appear in Goals sections.
+
+DO NOT write the final report output until every item has passed validations A, B, C, and D.
 Correct all placement and inclusion errors before proceeding.
 
 
