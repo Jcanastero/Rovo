@@ -54,6 +54,8 @@ Use ONLY the exact value of the Jira field "Work Category" on each issue. Never 
 
 Issues with any other Work Category value → exclude from Goals sections; add to "Issues without Work Category" list.
 
+AUDIT after classifying: Count issues in DONE_LIST. Count issues placed in KEY GOALS + KEY TECHNICAL GOALS + "Issues without Work Category". These two counts MUST be equal. If they differ, find every unclassified issue in DONE_LIST and classify it before moving to Step 4. No issue in DONE_LIST may be skipped or lost.
+
 ---
 
 ## STEP 4 — GROUP BY EPIC
