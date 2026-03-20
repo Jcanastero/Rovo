@@ -62,8 +62,8 @@ For each issue in KEY GOALS and KEY TECHNICAL GOALS:
 2. If it has an Epic → fetch that Epic's Summary/title from Jira. Use the Epic's title as the group header. NEVER use the Epic ID (e.g., DID-XXXXX) as a header.
 3. If it has NO Epic → use the Work Category value as the group header.
 4. All issues sharing the same Epic go into ONE bullet. Do not split them.
-5. Every single issue in KEY GOALS must appear in exactly one bullet — verify before writing.
-6. Every single issue in KEY TECHNICAL GOALS must appear in exactly one bullet — verify before writing.
+5. STRICT MEMBERSHIP RULE: A bullet may ONLY contain issue IDs that are in KEY GOALS (or KEY TECHNICAL GOALS). NEVER add an issue to a bullet just because it shares the same Epic with a qualifying issue. If an issue is in PENDING_LIST, it is FORBIDDEN from appearing in any Goals bullet, even if its Epic appears in Goals.
+6. COMPLETENESS CHECK — Before writing: go through every issue in KEY GOALS one by one and confirm it appears in a bullet. Do the same for KEY TECHNICAL GOALS. If any issue is missing, add it to its Epic group. Zero omissions allowed.
 
 ---
 
