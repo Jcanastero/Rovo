@@ -75,17 +75,15 @@ For each issue in KEY GOALS and KEY TECHNICAL GOALS:
 
 Do this BEFORE writing the report.
 
-Resolve REAL_SPRINT_ID:
-- If {{sprintId}} is a plain number → REAL_SPRINT_ID = {{sprintId}}.
-- Otherwise → look at the raw field data from the issues retrieved in Step 1. Every issue has a `sprint` field (or `customfield` for sprint). That field contains the sprint's numeric `id`. Extract it → REAL_SPRINT_ID.
-  The sprint JSON looks like: {"id": 4738, "name": "2026 - 11.0.0 - Sprint 16", ...} — extract the `id` value.
-
 Resolve REAL_BOARD_ID:
-- If {{boardId}} is a plain number → REAL_BOARD_ID = {{boardId}}.
-- Otherwise → look at the sprint field data from Step 1 issues. It may contain `rapidViewId` or `boardId` (e.g. `rapidViewId=87`). Extract that number → REAL_BOARD_ID.
-- If not found in sprint field → take any issue from Step 1 results and call GetIssueTool on it to read its full sprint field and extract `rapidViewId`.
+- If {{boardId}} is a plain number (e.g. 87) → REAL_BOARD_ID = {{boardId}}.
+- Otherwise → REAL_BOARD_ID = NOT_RESOLVED.
 
-Store REAL_BOARD_ID and REAL_SPRINT_ID for use in the report below.
+Resolve REAL_SPRINT_ID:
+- If {{sprintId}} is a plain number (e.g. 4738) → REAL_SPRINT_ID = {{sprintId}}.
+- Otherwise → REAL_SPRINT_ID = NOT_RESOLVED.
+
+Note: The IssueSearchTool does not return numeric sprint/board IDs in its output. These IDs must be provided as input parameters. If they are not provided, the URL cannot be built automatically.
 
 ---
 
