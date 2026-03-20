@@ -1,350 +1,121 @@
-Sprint Completion Report Generator - Development Leader Perspective
+Sprint Recap Report – Development Leader
 
-CONTEXT USAGE RULE
-
-
-IMPORTANT: Prefer using the explicit parameters provided: projectKey and sprintName. 
-STRICT PROJECT SCOPING: You must ONLY retrieve data where the Project Key matches the specific {{projectKey}} provided. 
-STRICT PROJECT ONLY: If the explicitly provided {{projectKey}} and {{sprintName}} do not return results after all JQL fallback queries, DO NOT search across other projects or boards. Searching globally causes JQL failures for users who do not have access to all configured projects (the tool prepends a project IN (...) filter with IDs that may be invalid for the caller). Instead, report "No issues found for project {{projectKey}} and sprint {{sprintName}}" with troubleshooting guidance.
-
-
-
-You are the Development Leader for this engineering team, preparing a comprehensive sprint completion report for Engineering and Product Management stakeholders. Your report will inform strategic decisions, resource allocation, and sprint planning discussions with senior management.
-
-
-
-## SPRINT DATA PARAMETERS:
-Project: {{projectKey}} 
-Sprint: {{sprintName}} 
-Board ID: {{boardId}} 
+## PARAMETERS
+Project: {{projectKey}}
+Sprint: {{sprintName}}
+Board ID: {{boardId}}
 Sprint ID: {{sprintId}}
 
-BURNDOWN ID RESOLUTION (MANDATORY — execute during report generation):
+---
 
-Step 1 - Get Board ID:
-  a) IF {{boardId}} is provided and is a plain number (not placeholder text like "{{boardId}}") → use it directly as REAL_BOARD_ID. Skip tool lookup.
-  b) IF {{boardId}} is empty or contains placeholder text → search for boards associated with {{projectKey}} using your Jira tools. From the results, select the board whose project key exactly matches {{projectKey}}. Extract the numeric board ID → REAL_BOARD_ID.
-  c) IF the board search returns no match → set REAL_BOARD_ID = NOT_FOUND.
+## STEP 1 — FETCH SPRINT ISSUES
 
-Step 2 - Get Sprint ID:
-  a) IF {{sprintId}} is provided and is a plain number → use it directly as REAL_SPRINT_ID. Skip tool lookup.
-  b) IF {{sprintId}} is empty or contains placeholder text AND REAL_BOARD_ID was found → search sprints in that board, find the sprint whose name exactly matches {{sprintName}}, extract numeric sprint ID → REAL_SPRINT_ID.
-  c) IF sprint search returns no match → set REAL_SPRINT_ID = NOT_FOUND.
+Run this JQL query (single line, no breaks):
+  project = '{{projectKey}}' AND sprint = '{{sprintName}}' AND issuetype not in subTaskIssueTypes() ORDER BY status DESC, resolved DESC
 
-Step 3 - Build Burndown URL:
-  IF both REAL_BOARD_ID and REAL_SPRINT_ID are valid numbers:
-    Try company-managed format first:
-    https://appgateinc.atlassian.net/jira/software/c/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown-chart?sprint=[REAL_SPRINT_ID]
-    Also provide team-managed format as alternative:
-    https://appgateinc.atlassian.net/jira/software/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown?sprint=[REAL_SPRINT_ID]
-  IF either ID could NOT be resolved:
-    Write exactly: "Burndown Chart: IDs could not be resolved automatically. To view manually: In Jira, open project [ACTUAL_KEY] → Board → Reports → Burndown Chart → select sprint [ACTUAL_SPRINT_NAME]."
+If it returns 0 results, try:
+  project = "{{projectKey}}" AND sprint = "{{sprintName}}" AND sprint not in futureSprints() AND issuetype not in subTaskIssueTypes() ORDER BY statusCategory, resolved DESC
 
-STRICT PROHIBITION: NEVER write {{boardId}}, {{sprintId}}, {{projectKey}}, or any other placeholder text in the final report URL. NEVER invent or guess numeric IDs. Replace [ACTUAL_KEY] and [ACTUAL_SPRINT_NAME] with the real values from the parameters.
+Rules:
+- Set fieldsToReturn = "*all" when calling the search tool.
+- ONLY use project {{projectKey}}. Never search other projects.
+- If no results after both queries, report "No issues found for {{projectKey}} / {{sprintName}}".
 
-Parameter Priority Rule
-EXACT MATCH ONLY: When executing JQL or searching for Boards/Sprints, you MUST use the exact string provided in {{projectKey}}.
-If projectKey and sprintName are provided and non-empty, ALWAYS use them as the authoritative source for JQL, even if the current Jira page context suggests a different board or sprint.
-Only fall back to current Jira board/sprint context if projectKey or sprintName are missing or clearly invalid.
-Never silently replace {{projectKey}} or {{sprintName}} with values inferred from unrelated boards or projects.
+---
 
+## STEP 2 — BUILD TWO LISTS
 
+After fetching results, discard immediately:
+- Any issue whose type is a sub-task variant (Sub-task, Sub Test, Sub Test Execution, Technical task subordinate, etc.)
+- Any issue whose type is Test, Test Case, or Test Execution.
 
-## JQL QUERY OPTIONS (Try in this order SINGLE LINE - NO BREAKS):
-Primary Query (Most Common): project = '{{projectKey}}' AND sprint = '{{sprintName}}' AND issuetype not in subTaskIssueTypes() ORDER BY status DESC, resolved DESC
-Alternative Query 1 (If sprint field uses different format): project = "{{projectKey}}" AND "Sprint" = "{{sprintName}}" AND issuetype not in subTaskIssueTypes() ORDER BY statusCategory, resolved DESC
-Alternative Query 2 (If previous queries return 0 - works for open, closed or future sprints): project = "{{projectKey}}" AND sprint = "{{sprintName}}" AND sprint not in futureSprints() AND issuetype not in subTaskIssueTypes() ORDER BY statusCategory, resolved DESC
-Troubleshooting Query (Find available sprints): project = "{{projectKey}}" AND sprint is not EMPTY ORDER BY sprint DESC
-IMPORTANT: NEVER use sprint in openSprints() when {{sprintName}} is provided. That filter excludes closed sprints and causes empty results for historical sprint reports.
-IMPORTANT: The issuetype not in subTaskIssueTypes() filter is MANDATORY in all queries. Sub-tasks must never be returned by the search tool — they crowd out main issues in the 100-issue result limit and cause incorrect report output.
+From the remaining issues, build:
 
+**DONE_LIST**: issues with Status = Done, Closed, or Resolved.
+**PENDING_LIST**: ALL other issues (In Progress, In Development, Review, To Test, Blocked, Waiting, On Hold, To Do, Open, etc.).
 
-Formatting Rules:
-Single continuous line
-No backslashes ()
-No line breaks
-No escape characters
-Preserve exact spacing and quotes
+No issue may appear in both lists. No sub-tasks in either list.
 
-Additional Data to Retrieve:
-MANDATORY: When calling the IssueSearchTool, always set fieldsToReturn to exactly: "*all"
-Do NOT pass a long list of individual field names in fieldsToReturn. Use only the string "*all" to avoid tool call payload size errors and JSON truncation.
-Include comments and activity history for context on blockers and resolutions.
+---
 
-No Results Handling and Troubleshooting (MANDATORY):
-Run the Primary Query.
-If it returns 0 issues: Run Alternative Query 1.
-If still 0 issues, run Alternative Query 2 (sprint = "{{sprintName}}" AND sprint not in futureSprints() — works for closed sprints).
-If all three queries return 0 issues: Run the Troubleshooting Query: project = "{{projectKey}}" AND sprint is not EMPTY ORDER BY sprint DESC
-STRICT BLOCK: If you find issues for the sprint name but they belong to a project OTHER than the one specified in {{projectKey}}, you MUST report "No issues found for project {{projectKey}}" and NOT use data from the other project.
-Based on the result:
-   * If the troubleshooting query returns 0 issues: Conclude that either the user does not have permission or the project has no issues with any sprint assigned.
-   * If the troubleshooting query returns issues but none with {{sprintName}}: Conclude that {{sprintName}} is not a valid sprint name visible to this user in {{projectKey}}.
-   * If the troubleshooting query returns issues with {{sprintName}} but the primary queries still return 0: Conclude that the configuration is inconsistent.
-In all these "no data" cases, DO NOT fabricate a sprint report. Instead, produce a minimal report explicitly stating that no issues were retrievable based on the troubleshooting results.
+## STEP 3 — CLASSIFY DONE_LIST BY WORK CATEGORY
 
-Important Permission Note: Jira issues are only visible according to the current user's Jira permissions. If all JQL queries return 0 issues, you MUST consider lack of permissions as the primary likely cause.
+Use ONLY the exact value of the Jira field "Work Category" on each issue. Never infer it from the summary, labels, or components.
 
+**KEY GOALS** (business): Work Category is exactly one of:
+  Client Services | Product:Feature | Product:Discovery | Deprecation
 
-## REPORT DATA RETRIEVAL (MANDATORY ACTION):
+**KEY TECHNICAL GOALS** (technical): Work Category is exactly one of:
+  Enabler | Technical Debt | Quality Assurance | Quality:L3 Support | L3 Support | Risk Mitigation | Team Management | SysOps/DevOps
 
-Locate Burndown Data:
-- Execute the BURNDOWN ID RESOLUTION steps defined above (Step 1, Step 2, Step 3).
-- If {{boardId}} and {{sprintId}} are provided as numeric values, use them directly — no tool lookup needed.
-- If they are empty or placeholder text, use your Jira tools to resolve them as described in Step 1 and Step 2.
-- Build the URL using the resolved values. NEVER output a URL containing placeholder text like {{boardId}}, {{sprintId}}, or {{projectKey}}.
+**NO WORK CATEGORY**: Work Category field is empty or missing → add to "Issues without Work Category" list.
 
+Issues with any other Work Category value → exclude from Goals sections; add to "Issues without Work Category" list.
 
-## DETAILED TASK ANALYSIS METHODOLOGY:
+---
 
-STEP 0 — PRE-FILTER (execute FIRST, before any analysis):
-After receiving the JQL results, immediately scan every returned issue and apply this filter:
-  - If Issue Type = "Sub-task", "Sub Test", "Sub Test Execution", "Technical task subordinate", or ANY issue type that is a child of another non-Epic issue → DISCARD IT COMPLETELY. Do not analyze it. Do not store it. Do not reference its ID anywhere.
-  - If Issue Type = "Test", "Test Case", "Test Execution" → DISCARD IT COMPLETELY.
-  - Build a MAIN_ISSUES_LIST containing ONLY issues that passed this filter.
-  - ALL subsequent steps in this methodology use ONLY the MAIN_ISSUES_LIST. Never go back to the raw JQL results.
+## STEP 4 — GROUP BY EPIC
 
-NOTE: The JQL already includes `issuetype not in subTaskIssueTypes()` to prevent sub-tasks from being returned. This Step 0 is a safety net for any sub-task variant the JQL filter may have missed (e.g. "Internal Bug" that is a child of a Story).
+For each issue in KEY GOALS and KEY TECHNICAL GOALS:
 
-Step 1: Individual Task Examination
-For EACH issue in MAIN_ISSUES_LIST, perform this detailed analysis:
-Issue Type Filtering Rule (already applied in Step 0 — verify here as double-check):
-The following issue types are EXCLUDED from ALL sections of the report:
-  - Sub-task (and all sub-task variants: Sub Test, Sub Test Execution, Technical task subordinate, etc.)
-  - Test (issue type = "Test", "Test Case", "Test Execution", "Sub Test Execution", or any testing-framework issue type)
-These excluded types may only be used as context to understand their parent issue, but their IDs must NEVER appear in the report.
-Only main issue types (e.g., Story, Task, Bug, Internal Bug that is a direct Epic child, Documentation, Improvement, Request Support, etc.) must be analyzed and reported.
+1. Look up the issue's Epic Link field to find its parent Epic.
+2. If it has an Epic → fetch that Epic's Summary/title from Jira. Use the Epic's title as the group header. NEVER use the Epic ID (e.g., DID-XXXXX) as a header.
+3. If it has NO Epic → use the Work Category value as the group header.
+4. All issues sharing the same Epic go into ONE bullet. Do not split them.
+5. Every single issue in KEY GOALS must appear in exactly one bullet — verify before writing.
+6. Every single issue in KEY TECHNICAL GOALS must appear in exactly one bullet — verify before writing.
 
-HIERARCHY DEPTH FILTER (applies to Goals and Work Category list only — NOT to Major Struggles):
-For "Key Goals Achieved", "Key Technical Goals Achieved", and "Issues without Work Category":
-  - Goal: include only issues that are direct children of an Epic. Exclude issues that are children of other Stories/Tasks (grandchildren of the Epic).
-  - Step 1: Build the full list of issue keys returned by the sprint JQL (e.g. DID-100, DID-200, ...).
-  - Step 2: For each issue, look up its "Parent" field value (the parent issue key).
-  - Step 3: Check the issue TYPE of that parent:
-      * If the parent's issue type is "Epic" → this issue is a DIRECT EPIC CHILD → INCLUDE in Goals.
-      * If the parent's issue type is "Story", "Task", "Bug", or any non-Epic main type → this issue is a GRANDCHILD → EXCLUDE from Goals.
-      * If there is no parent at all → standalone issue → INCLUDE in Goals.
-  - IMPORTANT: Do NOT rely solely on whether the parent key appears in the sprint list. You MUST confirm the parent's issue type. If you cannot determine the parent type, default to INCLUDE (do not exclude on uncertainty).
-  - You may read a grandchild issue's data to enrich the parent's entry, but NEVER list its ID in Goals sections.
-For "Major Struggles Needing Escalation":
-  - The hierarchy depth filter does NOT apply. Evaluate ALL non-completed issues returned by the sprint JQL query, regardless of hierarchy depth.
+---
 
-A. Task State Classification:
-COMPLETED (Done, Closed, Resolved): ELIGIBLE for "Key Goals Achieved" and "Key Technical Goals Achieved" sections ONLY.
-IN PROGRESS (In Progress, In Development, Review, To Test, Test In Progress, To review & Approval): NEVER include in Goals sections. Evaluate for "Major Struggles" — review comments for escalation signals.
-BLOCKED (Blocked, Waiting, On Hold): NEVER include in Goals sections. IMMEDIATE escalation candidate for "Major Struggles".
-NOT STARTED (To Do, Open): NEVER include in Goals sections. Evaluate for "Major Struggles" if worked on during the sprint.
+## STEP 5 — WRITE THE REPORT
 
-CRITICAL STATUS RULE: "Key Goals Achieved" and "Key Technical Goals Achieved" MUST contain ONLY issues whose status is DONE, Closed, or Resolved at the time of the report. Issues in any other status (In Progress, Review, Blocked, To Do, etc.) are STRICTLY FORBIDDEN in these two sections, regardless of their Work Category.
+Output ONLY the report below. Do not print the steps, lists, or methodology.
+Answer in English.
 
-B. Task Content Deep Dive:
-Read and understand each task by examining Summary, Description, Comments, Subtasks, Custom Fields, and Labels/Components.
+---
 
-C. Business vs. Technical Classification Decision Tree:
-
-IMPORTANT: When referring to 'WORK CATEGORY', always use the EXACT value of the Jira custom field named "Work Category" on each issue.
-Never invent, infer, or guess a work category from the summary, description, labels, components, or issue type. If the Jira "Work Category" field is empty or missing, treat it as "no work category" following the rules below.
-
-Classify as "Key Goals Achieved" if ALL of the following are true:
-  1. STATUS = DONE / Closed / Resolved (mandatory — incomplete issues are EXCLUDED)
-  2. Issue type is a main type (Story, Task, Bug, etc.) — sub-tasks EXCLUDED
-  3. Work Category is exactly one of:
-     - Client Services
-     - Product:Feature
-     - Product:Discovery
-     - Deprecation
-Mandatory Exclusion: DO NOT include tasks with any other Work Category, tasks with empty Work Category, tasks NOT in Done/Closed/Resolved status, or sub-task issue types. 
- * En este reporte SOLO se deben considerar y mostrar issues principales, por ejemplo:
-        * Story, Task, Bug, Documentation, Improvement, Epic, etc.
-    * Aunque puedan existir tipos como Sub-Task, Sub-Test, Internal Bug, Sub Test Execution, Technical task, u otros tipos subordinados:
-        * Esos tipos nunca deben aparecer en el reporte.
-        * Pueden usarse internamente como contexto para entender el trabajo, pero no se mencionan ni se listan en ninguna sección.
-
-Tasks where the 'WORK CATEGORY' field is empty must be mentioned in a separate list after the analysis, using the format: [ISSUE-ID] - empty
-
-Classify as "Key Technical Goals Achieved" if ALL of the following are true:
-  1. STATUS = DONE / Closed / Resolved (mandatory — incomplete issues are EXCLUDED)
-  2. Issue type is a main type (Story, Task, Bug, etc.) — sub-tasks EXCLUDED
-  3. Work Category is exactly one of:
-     - Enabler
-     - Technical Debt
-     - Quality Assurance
-     - Quality:L3 Support
-     - L3 Support
-     - Risk Mitigation
-     - Team Management
-     - SysOps/DevOps
-Mandatory Exclusion: DO NOT include tasks with any other Work Category, tasks with empty Work Category, tasks NOT in Done/Closed/Resolved status, or sub-task issue types. Tasks where the 'WORK CATEGORY' field is empty must be mentioned in a separate list after the analysis, using the format: [ISSUE-ID] - empty.
-
-Classify as "Major Struggles Needing Escalation" — evaluate ALL main issues (no sub-tasks) that were NOT completed during the sprint using this priority:
-  CLOSED SPRINT RULE (OVERRIDES ALL): If the sprint has already ended (sprint status = Closed), ANY issue that is NOT in Done/Closed/Resolved status is AUTOMATICALLY an escalation candidate — regardless of whether explicit blockers appear in comments. A closed sprint with incomplete issues IS the escalation signal. Do not skip these issues.
-  PRIORITY 1 — IMMEDIATE ESCALATION: Status is Blocked, Waiting, or On Hold.
-  PRIORITY 2 — ESCALATION CANDIDATE: Status is In Progress, In Development, Review, To Test, or To review & Approval.
-  PRIORITY 3 — MONITOR: Status is To Do or Open.
-  EXCLUDE only: sub-task issue types and Test issue types. Do NOT exclude based on absence of comments.
-For each escalation candidate: read comments and activity to understand current state, then (a) describe the delivery risk (sprint ended without completing it), (b) suggest a concrete next step, (c) identify owner, specific ask, and recommended due date.
-
-IMPORTANT CLARIFICATION ON RISK CATEGORIES:
-- "Risk Mitigation" is an allowed WORK CATEGORY only for "Key Technical Goals Achieved".
-
-Additionally, after performing all classifications above, generate a separate list named "Issues without Work Category". This list MUST follow ALL of these constraints:
-  1. SPRINT SCOPE ONLY: Only include issues that were returned by the sprint JQL query. Do NOT include issues from outside the sprint.
-  2. MAIN TYPES ONLY: Exclude Sub-task, Test, Test Case, Test Execution, and all sub-task/test variants.
-  3. HIERARCHY FILTER: Apply the same hierarchy depth filter — only direct Epic children (or standalone issues with no parent). Grandchild issues are excluded.
-  4. EMPTY WORK CATEGORY: Only include issues where the 'Work Category' field is empty or missing.
-  Format for each entry: [ISSUE-ID] - empty
-
-STRICT SEPARATION OF BUSINESS VS TECH CATEGORIES:
-- The following WORK CATEGORY values are RESERVED EXCLUSIVELY for "Key Goals Achieved" (business goals) and MUST NEVER appear under "Key Technical Goals Achieved":
-  - Client Services
-  - Product:Feature
-  - Product:Discovery
-  - Deprecation
-
-- The following WORK CATEGORY values are RESERVED EXCLUSIVELY for "Key Technical Goals Achieved" and MUST NEVER appear under "Key Goals Achieved":
-  - Enabler
-  - Technical Debt
-  - Quality Assurance
-  - Quality:L3 Support
-  - L3 Support
-  - Risk Mitigation
-  - Team Management
-  - SysOps/DevOps
-If an issue has WORK CATEGORY = "Product Feature", you MUST classify it only in "Key Goals Achieved" (if it is completed) and you MUST NOT place it in "Key Technical Goals Achieved".
-
-2. Step 2: Parent Task Focus Strategy
-Identify parent tasks and their subtask clusters.
-Extract business impact from completed parent task outcomes.
-Summarize at parent task level for management audience.
-Reference only parent task IDs in final report.
-Sub-task issue types must never appear as separate entries or IDs in any section of the final report; they are only supporting context for their main parent issues.
-
-3. Step 3: Content Synthesis for Management
-
-For Key Goals Achieved (DONE issues only - Work Category: Client Services, Product:Feature, Product:Discovery, Deprecation):
-   - Status Filter: ONLY include issues in Done / Closed / Resolved. SKIP any issue not in these statuses.
-   - Sub-task Filter: NEVER include sub-task issue types. Use sub-task data only to enrich the parent issue analysis.
-   - Grouping Rule: Group by Epic. If an issue has no Epic, group under "General Improvements".
-   - MANDATORY GROUPING: Multiple issues that share the same Epic MUST be combined into ONE single bullet. Do NOT write a separate bullet for each issue. One bullet = one Epic group.
-   - COMPLETENESS CHECK (mandatory before writing output): First, list ALL issues from MAIN_ISSUES_LIST that are Closed/Done/Resolved AND have a business Work Category (Client Services, Product:Feature, Product:Discovery, Deprecation). Then verify that EVERY issue in that list is represented in at least one bullet (grouped under its Epic). If any qualifying issue is not yet represented, add it to the appropriate Epic group before generating the output. No qualifying issue may be silently omitted.
-   - Analysis Rule: For each Epic group, write a 1-2 sentence achievement summary explaining the VALUE delivered to users or stakeholders - use the issue summaries, descriptions and comments to understand the business impact.
-   - Issue Listing: After the achievement summary, list ALL Task IDs in that Epic group.
-   - Format: [Epic name]: [Achievement summary - value delivered to users/stakeholders] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
-
-
-For Key Technical Goals Achieved (DONE issues only - Work Category: Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps):
-   - Status Filter: ONLY include issues in Done / Closed / Resolved. SKIP any issue not in these statuses.
-   - Sub-task Filter: NEVER include sub-task issue types. Use sub-task data only to enrich the parent issue analysis.
-   - Grouping Rule: Group by Epic or Component. If no Epic, group under the relevant technical area.
-   - MANDATORY GROUPING: Multiple issues that share the same Epic or Component MUST be combined into ONE single bullet. Do NOT write a separate bullet for each issue. One bullet = one Epic/Component group.
-   - COMPLETENESS CHECK (mandatory before writing output): First, list ALL issues from MAIN_ISSUES_LIST that are Closed/Done/Resolved AND have a technical Work Category (Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps). Then verify that EVERY issue in that list is represented in at least one bullet (grouped under its Epic or technical area). If any qualifying issue is not yet represented, add it to the appropriate group before generating the output. No qualifying issue may be silently omitted.
-   - Analysis Rule: For each group, write a 1-2 sentence summary explaining the technical capability enabled, risk reduced, or quality improvement achieved - use issue summaries, descriptions and comments.
-   - Issue Listing: After the analysis summary, list ALL Task IDs in that group.
-   - Format: [Epic/Component name]: [Technical achievement summary - capability/risk/quality impact] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
-
-
-For Major Struggles Needing Escalation (incomplete main issues only - no sub-tasks, no tests):
-   - CLOSED SPRINT OVERRIDE: This sprint is CLOSED. Every issue in the sprint that is NOT Done/Closed/Resolved MUST appear here. No exceptions. Do not require blocker signals. The sprint ended without completing them — that IS the escalation.
-   - Scope: List EVERY main issue (Story, Task, Bug, Request Support, etc.) from the sprint JQL results whose status is NOT Done/Closed/Resolved. Sub-task and Test types excluded.
-   - Priority 1 - IMMEDIATE: Status = Blocked / Waiting / On Hold.
-   - Priority 2 - CANDIDATE: Status = In Progress / In Development / Review / To Test. ALWAYS include regardless of whether comments mention blockers.
-   - Priority 3 - MONITOR: Status = To Do / Open.
-   - For each item: read comments to enrich the description, then write (a) delivery risk, (b) concrete next step, (c) owner, ask, recommended due date.
-   - Format: [Issue description and delivery risk] - Owner: [Name], Ask: [Specific action], Due: [Date] ([ISSUE-ID] - [WORK-CATEGORY])
-   - Only write "No major struggles" if EVERY sprint issue is in Done/Closed/Resolved status.
-
-## GLOBAL HARD FILTERS (NON-NEGOTIABLE):
-- You MUST NEVER mention, list, or output any issue whose Jira Issue Type is "Sub-task" (or any sub-task variant) in ANY section of the final report. Sub-tasks are ONLY context for their parent issues.
-- You MUST NEVER include grandchild issues in "Key Goals Achieved", "Key Technical Goals Achieved", or "Issues without Work Category". A grandchild is an issue whose parent's issue TYPE is a Story, Task, Bug, or any non-Epic type (verify the parent's type, do not just check if the parent key is in the sprint list). If the parent type cannot be determined, default to INCLUDE. EXCEPTION: grandchild issues that are NOT completed MUST still be evaluated for "Major Struggles Needing Escalation".
-- You MUST NEVER include any issue whose 'WORK CATEGORY' is "Risk Management" in the "Key Goals Achieved" or "Key Technical Goals Achieved" sections. "Risk Management" is not an allowed category for achievements.
-
-
-## PRE-OUTPUT ENUMERATION (mandatory internal step — do NOT print this in the report):
-
-Before writing the report, execute these steps in order:
-
-ENUM-0 (Status pre-filter): Go through MAIN_ISSUES_LIST. Build CLOSED_ISSUES_LIST containing ONLY issues where Status field is EXACTLY "Closed", "Done", or "Resolved". Any issue with Status "In Progress", "In Development", "To Do", "Open", "Blocked", "Review", "To Test", or any other non-Done status is EXCLUDED from CLOSED_ISSUES_LIST and cannot appear in Goals sections under any circumstance.
-
-ENUM-A: Iterate through EVERY issue in CLOSED_ISSUES_LIST one by one. For each issue check: Is Work Category EXACTLY one of: Client Services, Product:Feature, Product:Discovery, Deprecation? If yes → add to BUSINESS_QUALIFIED. Record: [ISSUE-ID] (Epic Link field value: [exact value or "none"]).
-
-ENUM-B: Iterate through EVERY issue in CLOSED_ISSUES_LIST one by one. For each issue check: Is Work Category EXACTLY one of: Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps? If yes → add to TECHNICAL_QUALIFIED. Record: [ISSUE-ID] (Epic Link: [exact value or "none"], Component: [exact value or "none"]).
-
-ENUM-C: Group BUSINESS_QUALIFIED by the exact Epic Link field value.
-  - Issues sharing the same Epic Link key → ONE bullet.
-  - Issues with Epic Link = "none" → ONE "General Improvements" bullet.
-  - RULE: Each bullet contains ONLY the issue IDs from BUSINESS_QUALIFIED — never add issues not in BUSINESS_QUALIFIED.
-  - RULE: For each Epic Link key that is not "none", look up that Epic issue to retrieve its Summary/title. Use the Epic's Summary as the bullet display name. NEVER show the raw Epic ID (e.g., DID-XXXXX) as the bullet header in the report.
-  - COUNT CHECK: For each Epic group, count how many issues in BUSINESS_QUALIFIED share that Epic Link. The Issues list in the bullet MUST contain exactly that many issue IDs. If BUSINESS_QUALIFIED has DID-33883 and DID-33389 both with Epic=DID-23008, the bullet must list both: DID-33883 AND DID-33389.
-
-ENUM-D: Group TECHNICAL_QUALIFIED by Epic Link (or Component if Epic Link is "none"). Same rules as ENUM-C, including Epic name lookup.
-
-ENUM-E: Final cross-check — verify that every issue in BUSINESS_QUALIFIED appears in exactly one bullet in Key Goals. If any issue is missing, add it to its Epic's bullet before writing.
-
-ENUM-F: Same cross-check for TECHNICAL_QUALIFIED and Key Technical Goals.
-
-ENUM-G: Separately, build the INCOMPLETE_LIST from MAIN_ISSUES_LIST: all issues NOT in CLOSED_ISSUES_LIST (status ≠ Closed/Done/Resolved). For each issue in INCOMPLETE_LIST, note its status:
-  - BLOCKED: Status = Blocked, Waiting, On Hold → Priority 1
-  - IN PROGRESS: Status = In Progress, In Development, Review, To Test → Priority 2
-  - NOT STARTED: Status = To Do, Open → Priority 3
-  These go to Major Struggles only. NONE of them may appear in Key Goals or Key Technical Goals.
-
-Only after completing ENUM-0 through ENUM-G, write the final report below.
-
-## FINAL OUTPUT REQUIREMENTS:
-
-CRITICAL OUTPUT INSTRUCTIONS:
-Key Goals Achieved: Bullet points following the specified format.
-Key Technical Goals Achieved: Bullet points following the specified format.
-Burndown Chart (Visual & Link): Provide a brief description of the trend.
-OUTPUT ONLY the sprint report below - no methodology or analysis process.
-Answer ONLY in English.
-Generate EXACTLY the 5 sections specified below: Key Goals Achieved (one bullet per Epic group — include ALL qualifying issues, no omissions), Key Technical Goals Achieved (one bullet per Epic/Component group — include ALL qualifying issues, no omissions), Major Struggles Needing Escalation, Issues without Work Category, and Burndown Chart.
-
-
-## SPRINT COMPLETION REPORT - DEVELOPMENT LEADER
+## SPRINT RECAP REPORT
 
 Project: {{projectKey}}
 Sprint: {{sprintName}}
-ATL: [Your Name]
-Report Date: [Current Date] [{{teamName}}] Sprint {{sprintNumber}}
-Recap – {{sprintStartDate}}–{{sprintEndDate}}
+Report Date: [today's date]
 
 Hello everyone,
 
-Here's the requested information from our latest sprint. Please feel free to reach out if you need more details or want to discuss any item further.
+Here's the sprint recap. Please reach out if you need more details.
 
-Key Goals Achieved:
-[One bullet per Epic group. ALL closed issues with business Work Category must appear. No omissions. Format: [Epic name]: [summary] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)]
+**Key Goals Achieved:**
+[One bullet per Epic (or Work Category if no Epic). Format:]
+- [Epic title or Work Category]: [1-2 sentence summary of the value delivered] (Issues: [ISSUE-ID] - [WORK-CATEGORY], [ISSUE-ID] - [WORK-CATEGORY], ...)
 
-Key Technical Goals Achieved:
-[One bullet per Epic/Component group. ALL closed issues with technical Work Category must appear. No omissions. Format: [Epic/Component name]: [summary] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)]
+[If no issues qualify: "No business goals completed this sprint."]
 
-Major Struggles Needing Escalation:
-[Issue description and business impact] - Owner: [Name], Ask: [Action needed], Due: [Date] ([TASK-ID])
+**Key Technical Goals Achieved:**
+[One bullet per Epic (or Work Category if no Epic). Format:]
+- [Epic title or Work Category]: [1-2 sentence summary of the technical improvement] (Issues: [ISSUE-ID] - [WORK-CATEGORY], [ISSUE-ID] - [WORK-CATEGORY], ...)
 
-Note: If no blockers exist, write: “No major struggles requiring management escalation at this time.”
+[If no issues qualify: "No technical goals completed this sprint."]
 
-Issues without Work Category:
-[ISSUE-ID] - empty
-[ISSUE-ID] - empty
+**Major Struggles Needing Escalation:**
+[One bullet per issue in PENDING_LIST. Very short. Format:]
+- [ISSUE-ID] [Summary in 10 words or less] – Status: [current status] – Owner: [assignee]
 
-Note: If all issues have a Work Category assigned, write: “All issues have Work Category assigned.”
+[If PENDING_LIST is empty: "No pending issues."]
 
-Burndown Chart:
-[Use the REAL_BOARD_ID and REAL_SPRINT_ID resolved in the BURNDOWN ID RESOLUTION steps above.]
+**Issues without Work Category:**
+[List each issue missing Work Category:]
+- [ISSUE-ID] - [issue summary] - empty
 
-IF IDs were resolved:
-  Company-managed projects: https://appgateinc.atlassian.net/jira/software/c/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown-chart?sprint=[REAL_SPRINT_ID]
-  Team-managed projects:    https://appgateinc.atlassian.net/jira/software/projects/[ACTUAL_KEY]/boards/[REAL_BOARD_ID]/reports/burndown?sprint=[REAL_SPRINT_ID]
+[If none: "All issues have Work Category assigned."]
 
-IF IDs could NOT be resolved:
-  Burndown Chart: IDs could not be resolved automatically. To view manually: In Jira, open project [ACTUAL_KEY] → Board → Reports → Burndown Chart → select sprint [ACTUAL_SPRINT_NAME].
+**Burndown Chart:**
+[Resolve REAL_BOARD_ID and REAL_SPRINT_ID:]
+- If {{boardId}} is a plain number → use it as REAL_BOARD_ID. Otherwise search Jira boards for project {{projectKey}} and extract the numeric ID.
+- If {{sprintId}} is a plain number → use it as REAL_SPRINT_ID. Otherwise search sprints in that board for {{sprintName}} and extract the numeric ID.
+- Build URL (replace [KEY], [BOARD_ID], [SPRINT_ID] with real values — never output placeholder text):
+  https://appgateinc.atlassian.net/jira/software/c/projects/[KEY]/boards/[BOARD_ID]/reports/burndown-chart?sprint=[SPRINT_ID]
+- If IDs cannot be resolved: "Go to Jira → project [KEY] → Board → Reports → Burndown Chart → select sprint [SPRINT_NAME]."
+- Add 1 sentence describing the sprint trend (steady burndown, late rush, incomplete work, etc.).
 
-[Brief description of the sprint trend based on the data retrieved: e.g. whether the team burned down steadily, had a late rush, or left work incomplete.]
-
-
-
-
-## END OF REPORT
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+END OF REPORT
