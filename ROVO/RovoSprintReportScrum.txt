@@ -71,7 +71,26 @@ For each issue in KEY GOALS and KEY TECHNICAL GOALS:
 
 ---
 
-## STEP 5 — WRITE THE REPORT
+## STEP 5 — RESOLVE BURNDOWN CHART URL
+
+Do this BEFORE writing the report. Use Jira tools (not search tools) to resolve the IDs.
+
+Resolve REAL_BOARD_ID:
+- If {{boardId}} is a plain number → REAL_BOARD_ID = {{boardId}}. Done, skip API call.
+- Otherwise → call Jira API: GET /rest/agile/1.0/board?projectKeyOrId={{projectKey}}
+  Find the board whose project key matches {{projectKey}}. Extract its numeric `id` → REAL_BOARD_ID.
+
+Resolve REAL_SPRINT_ID:
+- If {{sprintId}} is a plain number → REAL_SPRINT_ID = {{sprintId}}. Done, skip API call.
+- Otherwise → call Jira API: GET /rest/agile/1.0/board/[REAL_BOARD_ID]/sprint?state=closed
+  Find the sprint whose `name` exactly matches {{sprintName}}. Extract its numeric `id` → REAL_SPRINT_ID.
+  If not found in closed sprints, retry with state=active.
+
+Store REAL_BOARD_ID and REAL_SPRINT_ID for use in the report below.
+
+---
+
+## STEP 6 — WRITE THE REPORT
 
 Output ONLY the report below. Do not print the steps, lists, or methodology.
 Answer in English.
@@ -113,12 +132,9 @@ Here's the sprint recap. Please reach out if you need more details.
 [If none: "All issues have Work Category assigned."]
 
 **Burndown Chart:**
-[Resolve REAL_BOARD_ID and REAL_SPRINT_ID:]
-- If {{boardId}} is a plain number → use it as REAL_BOARD_ID. Otherwise search Jira boards for project {{projectKey}} and extract the numeric ID.
-- If {{sprintId}} is a plain number → use it as REAL_SPRINT_ID. Otherwise search sprints in that board for {{sprintName}} and extract the numeric ID.
-- Build URL (replace [KEY], [BOARD_ID], [SPRINT_ID] with real values — never output placeholder text):
-  https://appgateinc.atlassian.net/jira/software/c/projects/[KEY]/boards/[BOARD_ID]/reports/burndown-chart?sprint=[SPRINT_ID]
-- If IDs cannot be resolved: "Go to Jira → project [KEY] → Board → Reports → Burndown Chart → select sprint [SPRINT_NAME]."
+[Use REAL_BOARD_ID and REAL_SPRINT_ID resolved in Step 5. Replace with actual numbers — never output placeholder text or unresolved IDs.]
+- If both IDs resolved: https://appgateinc.atlassian.net/jira/software/c/projects/{{projectKey}}/boards/[REAL_BOARD_ID]/reports/burndown-chart?sprint=[REAL_SPRINT_ID]
+- If IDs could not be resolved: "Go to Jira → project {{projectKey}} → Board → Reports → Burndown Chart → select sprint {{sprintName}}."
 - Add 1 sentence describing the sprint trend (steady burndown, late rush, incomplete work, etc.).
 
 ---
