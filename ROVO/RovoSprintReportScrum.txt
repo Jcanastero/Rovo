@@ -259,6 +259,19 @@ For Major Struggles Needing Escalation (incomplete main issues only - no sub-tas
 - You MUST NEVER include any issue whose 'WORK CATEGORY' is "Risk Management" in the "Key Goals Achieved" or "Key Technical Goals Achieved" sections. "Risk Management" is not an allowed category for achievements.
 
 
+## PRE-OUTPUT ENUMERATION (mandatory internal step — do NOT print this in the report):
+
+Before writing the report, execute these steps in order:
+
+ENUM-A: From MAIN_ISSUES_LIST, select ALL issues where Status = Closed/Done/Resolved AND Work Category is in the business list (Client Services, Product:Feature, Product:Discovery, Deprecation). Write the full list: [ISSUE-ID] (Epic: [epic key or "none"]).
+ENUM-B: From MAIN_ISSUES_LIST, select ALL issues where Status = Closed/Done/Resolved AND Work Category is in the technical list (Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps). Write the full list: [ISSUE-ID] (Epic/Component: [epic or component or "none"]).
+ENUM-C: Group the ENUM-A list by Epic. Each unique Epic (or "no Epic") becomes exactly ONE bullet in Key Goals Achieved. Every issue from ENUM-A must appear in the bullet for its Epic. If there are 5 issues across 4 Epics, there must be 4 bullets. Do not merge different Epics. Do not drop any issue.
+ENUM-D: Group the ENUM-B list by Epic or Component. Same rule: every issue from ENUM-B must appear in exactly one bullet.
+ENUM-E: Verify: count(bullets in Key Goals) = count(distinct Epics in ENUM-A). If not equal, add the missing bullet before proceeding.
+ENUM-F: Verify: count(bullets in Key Technical Goals) = count(distinct Epics/Components in ENUM-B). If not equal, add the missing bullet before proceeding.
+
+Only after completing ENUM-A through ENUM-F, write the final report below.
+
 ## FINAL OUTPUT REQUIREMENTS:
 
 CRITICAL OUTPUT INSTRUCTIONS:
@@ -283,10 +296,10 @@ Hello everyone,
 Here's the requested information from our latest sprint. Please feel free to reach out if you need more details or want to discuss any item further.
 
 Key Goals Achieved:
-[2-6 bullets focusing on user/stakeholder impact]
+[One bullet per Epic group. ALL closed issues with business Work Category must appear. No omissions. Format: [Epic name]: [summary] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)]
 
 Key Technical Goals Achieved:
-[2-6 bullets focusing on quality/infra/tech-debt]
+[One bullet per Epic/Component group. ALL closed issues with technical Work Category must appear. No omissions. Format: [Epic/Component name]: [summary] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)]
 
 Major Struggles Needing Escalation:
 [Issue description and business impact] - Owner: [Name], Ask: [Action needed], Due: [Date] ([TASK-ID])
