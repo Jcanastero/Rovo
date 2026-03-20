@@ -263,28 +263,32 @@ For Major Struggles Needing Escalation (incomplete main issues only - no sub-tas
 
 Before writing the report, execute these steps in order:
 
-ENUM-A: Iterate through EVERY issue in MAIN_ISSUES_LIST one by one. For each issue, check TWO conditions independently:
-  Condition 1: Is Status EXACTLY one of: Closed, Done, Resolved? (any other status = FAIL)
-  Condition 2: Is Work Category EXACTLY one of: Client Services, Product:Feature, Product:Discovery, Deprecation?
-  Only if BOTH conditions pass → add to BUSINESS_QUALIFIED list with format: [ISSUE-ID] (Epic Link: [exact value of Epic Link field, or "none" if empty])
-  CRITICAL: Do NOT add any issue where Status is In Progress, In Development, To Do, Open, Blocked, Review, or any non-Done status.
+ENUM-0 (Status pre-filter): Go through MAIN_ISSUES_LIST. Build CLOSED_ISSUES_LIST containing ONLY issues where Status field is EXACTLY "Closed", "Done", or "Resolved". Any issue with Status "In Progress", "In Development", "To Do", "Open", "Blocked", "Review", "To Test", or any other non-Done status is EXCLUDED from CLOSED_ISSUES_LIST and cannot appear in Goals sections under any circumstance.
 
-ENUM-B: Same iteration. For each issue, check:
-  Condition 1: Status = Closed/Done/Resolved?
-  Condition 2: Work Category EXACTLY one of: Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps?
-  Only if BOTH pass → add to TECHNICAL_QUALIFIED list with format: [ISSUE-ID] (Epic Link: [exact Epic Link field value or "none"], Component: [exact Component field value or "none"])
+ENUM-A: Iterate through EVERY issue in CLOSED_ISSUES_LIST one by one. For each issue check: Is Work Category EXACTLY one of: Client Services, Product:Feature, Product:Discovery, Deprecation? If yes → add to BUSINESS_QUALIFIED. Record: [ISSUE-ID] (Epic Link field value: [exact value or "none"]).
 
-ENUM-C: Group BUSINESS_QUALIFIED list by the exact Epic Link field value. Issues with the same Epic Link key → same bullet. Issues with Epic Link = "none" → "General Improvements" bullet.
-  RULE: Each bullet contains ONLY the issue IDs from BUSINESS_QUALIFIED. Do NOT add other issues from the sprint just because they share an Epic with a qualified issue.
-  RULE: The Epic Link value MUST come from the issue's actual "Epic Link" field — do NOT infer or assign an Epic based on topic, theme, or related issues.
+ENUM-B: Iterate through EVERY issue in CLOSED_ISSUES_LIST one by one. For each issue check: Is Work Category EXACTLY one of: Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps? If yes → add to TECHNICAL_QUALIFIED. Record: [ISSUE-ID] (Epic Link: [exact value or "none"], Component: [exact value or "none"]).
 
-ENUM-D: Group TECHNICAL_QUALIFIED list by Epic Link (or Component if no Epic Link). Same rules as ENUM-C.
+ENUM-C: Group BUSINESS_QUALIFIED by the exact Epic Link field value.
+  - Issues sharing the same Epic Link key → ONE bullet.
+  - Issues with Epic Link = "none" → ONE "General Improvements" bullet.
+  - RULE: Each bullet contains ONLY the issue IDs from BUSINESS_QUALIFIED — never add issues not in BUSINESS_QUALIFIED.
+  - RULE: For each Epic Link key that is not "none", look up that Epic issue to retrieve its Summary/title. Use the Epic's Summary as the bullet display name. NEVER show the raw Epic ID (e.g., DID-XXXXX) as the bullet header in the report.
+  - COUNT CHECK: For each Epic group, count how many issues in BUSINESS_QUALIFIED share that Epic Link. The Issues list in the bullet MUST contain exactly that many issue IDs. If BUSINESS_QUALIFIED has DID-33883 and DID-33389 both with Epic=DID-23008, the bullet must list both: DID-33883 AND DID-33389.
 
-ENUM-E: Final status check — scan BUSINESS_QUALIFIED one more time. If any issue has Status that is NOT Closed/Done/Resolved, REMOVE it from the list before writing output.
+ENUM-D: Group TECHNICAL_QUALIFIED by Epic Link (or Component if Epic Link is "none"). Same rules as ENUM-C, including Epic name lookup.
 
-ENUM-F: Final status check for TECHNICAL_QUALIFIED — same as ENUM-E.
+ENUM-E: Final cross-check — verify that every issue in BUSINESS_QUALIFIED appears in exactly one bullet in Key Goals. If any issue is missing, add it to its Epic's bullet before writing.
 
-Only after completing ENUM-A through ENUM-F, write the final report below.
+ENUM-F: Same cross-check for TECHNICAL_QUALIFIED and Key Technical Goals.
+
+ENUM-G: Separately, build the INCOMPLETE_LIST from MAIN_ISSUES_LIST: all issues NOT in CLOSED_ISSUES_LIST (status ≠ Closed/Done/Resolved). For each issue in INCOMPLETE_LIST, note its status:
+  - BLOCKED: Status = Blocked, Waiting, On Hold → Priority 1
+  - IN PROGRESS: Status = In Progress, In Development, Review, To Test → Priority 2
+  - NOT STARTED: Status = To Do, Open → Priority 3
+  These go to Major Struggles only. NONE of them may appear in Key Goals or Key Technical Goals.
+
+Only after completing ENUM-0 through ENUM-G, write the final report below.
 
 ## FINAL OUTPUT REQUIREMENTS:
 
