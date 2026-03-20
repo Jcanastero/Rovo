@@ -40,6 +40,8 @@ No issue may appear in both lists. No sub-tasks in either list.
 
 ## STEP 3 — CLASSIFY DONE_LIST BY WORK CATEGORY
 
+CRITICAL: This step processes ONLY issues that are in DONE_LIST. Before classifying any issue, confirm it is in DONE_LIST. If an issue is in PENDING_LIST, skip it completely — do not classify it, do not add it to KEY GOALS or KEY TECHNICAL GOALS, regardless of its Work Category. PENDING_LIST issues are invisible to this step.
+
 Use ONLY the exact value of the Jira field "Work Category" on each issue. Never infer it from the summary, labels, or components.
 
 **KEY GOALS** (business): Work Category is exactly one of:
