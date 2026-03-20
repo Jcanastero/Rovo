@@ -31,8 +31,10 @@ After fetching results, discard immediately:
 
 From the remaining issues, build:
 
-**DONE_LIST**: issues with Status = Done, Closed, or Resolved.
-**PENDING_LIST**: ALL other issues (In Progress, In Development, Review, To Test, Blocked, Waiting, On Hold, To Do, Open, etc.).
+**DONE_LIST**: issues where the `Status` field value is exactly "Done", "Closed", or "Resolved".
+**PENDING_LIST**: ALL other issues (any other Status value).
+
+CRITICAL — Status field only: The status of an issue comes EXCLUSIVELY from its `Status` field. NEVER infer or guess status from the Summary, Description, Acceptance Criteria, or any other text — even if those fields contain words like "In Development" or "In Progress". An issue with `Status: "Closed"` belongs in DONE_LIST, period.
 
 No issue may appear in both lists. No sub-tasks in either list.
 
