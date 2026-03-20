@@ -225,8 +225,10 @@ For Key Goals Achieved (DONE issues only - Work Category: Client Services, Produ
    - Status Filter: ONLY include issues in Done / Closed / Resolved. SKIP any issue not in these statuses.
    - Sub-task Filter: NEVER include sub-task issue types. Use sub-task data only to enrich the parent issue analysis.
    - Grouping Rule: Group by Epic. If an issue has no Epic, group under "General Improvements".
+   - MANDATORY GROUPING: Multiple issues that share the same Epic MUST be combined into ONE single bullet. Do NOT write a separate bullet for each issue. One bullet = one Epic group.
+   - COMPLETENESS CHECK (mandatory before writing output): First, list ALL issues from MAIN_ISSUES_LIST that are Closed/Done/Resolved AND have a business Work Category (Client Services, Product:Feature, Product:Discovery, Deprecation). Then verify that EVERY issue in that list is represented in at least one bullet (grouped under its Epic). If any qualifying issue is not yet represented, add it to the appropriate Epic group before generating the output. No qualifying issue may be silently omitted.
    - Analysis Rule: For each Epic group, write a 1-2 sentence achievement summary explaining the VALUE delivered to users or stakeholders - use the issue summaries, descriptions and comments to understand the business impact.
-   - Issue Listing: After the achievement summary, list the Task IDs included.
+   - Issue Listing: After the achievement summary, list ALL Task IDs in that Epic group.
    - Format: [Epic name]: [Achievement summary - value delivered to users/stakeholders] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
 
 
@@ -234,8 +236,10 @@ For Key Technical Goals Achieved (DONE issues only - Work Category: Enabler, Tec
    - Status Filter: ONLY include issues in Done / Closed / Resolved. SKIP any issue not in these statuses.
    - Sub-task Filter: NEVER include sub-task issue types. Use sub-task data only to enrich the parent issue analysis.
    - Grouping Rule: Group by Epic or Component. If no Epic, group under the relevant technical area.
+   - MANDATORY GROUPING: Multiple issues that share the same Epic or Component MUST be combined into ONE single bullet. Do NOT write a separate bullet for each issue. One bullet = one Epic/Component group.
+   - COMPLETENESS CHECK (mandatory before writing output): First, list ALL issues from MAIN_ISSUES_LIST that are Closed/Done/Resolved AND have a technical Work Category (Enabler, Technical Debt, Quality Assurance, Quality:L3 Support, L3 Support, Risk Mitigation, Team Management, SysOps/DevOps). Then verify that EVERY issue in that list is represented in at least one bullet (grouped under its Epic or technical area). If any qualifying issue is not yet represented, add it to the appropriate group before generating the output. No qualifying issue may be silently omitted.
    - Analysis Rule: For each group, write a 1-2 sentence summary explaining the technical capability enabled, risk reduced, or quality improvement achieved - use issue summaries, descriptions and comments.
-   - Issue Listing: After the analysis summary, list the Task IDs included.
+   - Issue Listing: After the analysis summary, list ALL Task IDs in that group.
    - Format: [Epic/Component name]: [Technical achievement summary - capability/risk/quality impact] (Issues: [ISSUE-ID] - [WORK-CATEGORY], ...)
 
 
@@ -263,7 +267,7 @@ Key Technical Goals Achieved: Bullet points following the specified format.
 Burndown Chart (Visual & Link): Provide a brief description of the trend.
 OUTPUT ONLY the sprint report below - no methodology or analysis process.
 Answer ONLY in English.
-Generate EXACTLY the 5 sections specified below: Key Goals Achieved (2-6 bullets), Key Technical Goals Achieved (2-6 bullets), Major Struggles Needing Escalation, Issues without Work Category, and Burndown Chart.
+Generate EXACTLY the 5 sections specified below: Key Goals Achieved (one bullet per Epic group — include ALL qualifying issues, no omissions), Key Technical Goals Achieved (one bullet per Epic/Component group — include ALL qualifying issues, no omissions), Major Struggles Needing Escalation, Issues without Work Category, and Burndown Chart.
 
 
 ## SPRINT COMPLETION REPORT - DEVELOPMENT LEADER
