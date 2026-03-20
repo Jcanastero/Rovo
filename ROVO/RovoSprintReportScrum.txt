@@ -83,7 +83,7 @@ Resolve REAL_SPRINT_ID:
 Resolve REAL_BOARD_ID:
 - If {{boardId}} is a plain number → REAL_BOARD_ID = {{boardId}}.
 - Otherwise → look at the sprint field data from Step 1 issues. It may contain `rapidViewId` or `boardId` (e.g. `rapidViewId=87`). Extract that number → REAL_BOARD_ID.
-- If not found in sprint field → fetch issue DID-1 or any issue from this project using GetIssueTool and inspect its sprint field for `rapidViewId`.
+- If not found in sprint field → take any issue from Step 1 results and call GetIssueTool on it to read its full sprint field and extract `rapidViewId`.
 
 Store REAL_BOARD_ID and REAL_SPRINT_ID for use in the report below.
 
