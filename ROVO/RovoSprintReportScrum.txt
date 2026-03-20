@@ -78,14 +78,19 @@ For each issue in KEY GOALS and KEY TECHNICAL GOALS:
 Do this BEFORE writing the report.
 
 Resolve REAL_BOARD_ID:
-- If {{boardId}} is a plain number (e.g. 87) → REAL_BOARD_ID = {{boardId}}.
-- Otherwise → REAL_BOARD_ID = NOT_RESOLVED.
+- If {{boardId}} is a plain number → REAL_BOARD_ID = {{boardId}}. Skip API call.
+- Otherwise → call the Jira Agile API using any available HTTP or Jira tool:
+    GET https://appgateinc.atlassian.net/rest/agile/1.0/board?projectKeyOrId={{projectKey}}
+  Find the board entry where `location.projectKey` = "{{projectKey}}". Extract its numeric `id` → REAL_BOARD_ID.
 
 Resolve REAL_SPRINT_ID:
-- If {{sprintId}} is a plain number (e.g. 4738) → REAL_SPRINT_ID = {{sprintId}}.
-- Otherwise → REAL_SPRINT_ID = NOT_RESOLVED.
+- If {{sprintId}} is a plain number → REAL_SPRINT_ID = {{sprintId}}. Skip API call.
+- Otherwise → call the Jira Agile API using any available HTTP or Jira tool:
+    GET https://appgateinc.atlassian.net/rest/agile/1.0/board/[REAL_BOARD_ID]/sprint?state=closed
+  Find the sprint whose `name` matches exactly "{{sprintName}}". Extract its numeric `id` → REAL_SPRINT_ID.
+  If not found in closed, retry with state=active.
 
-Note: The IssueSearchTool does not return numeric sprint/board IDs in its output. These IDs must be provided as input parameters. If they are not provided, the URL cannot be built automatically.
+If both IDs resolved → build URL in report. If either cannot be resolved → write manual fallback.
 
 ---
 
