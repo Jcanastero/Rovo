@@ -73,18 +73,17 @@ For each issue in KEY GOALS and KEY TECHNICAL GOALS:
 
 ## STEP 5 — RESOLVE BURNDOWN CHART URL
 
-Do this BEFORE writing the report. Use Jira tools (not search tools) to resolve the IDs.
-
-Resolve REAL_BOARD_ID:
-- If {{boardId}} is a plain number → REAL_BOARD_ID = {{boardId}}. Done, skip API call.
-- Otherwise → call Jira API: GET /rest/agile/1.0/board?projectKeyOrId={{projectKey}}
-  Find the board whose project key matches {{projectKey}}. Extract its numeric `id` → REAL_BOARD_ID.
+Do this BEFORE writing the report.
 
 Resolve REAL_SPRINT_ID:
-- If {{sprintId}} is a plain number → REAL_SPRINT_ID = {{sprintId}}. Done, skip API call.
-- Otherwise → call Jira API: GET /rest/agile/1.0/board/[REAL_BOARD_ID]/sprint?state=closed
-  Find the sprint whose `name` exactly matches {{sprintName}}. Extract its numeric `id` → REAL_SPRINT_ID.
-  If not found in closed sprints, retry with state=active.
+- If {{sprintId}} is a plain number → REAL_SPRINT_ID = {{sprintId}}.
+- Otherwise → look at the raw field data from the issues retrieved in Step 1. Every issue has a `sprint` field (or `customfield` for sprint). That field contains the sprint's numeric `id`. Extract it → REAL_SPRINT_ID.
+  The sprint JSON looks like: {"id": 4738, "name": "2026 - 11.0.0 - Sprint 16", ...} — extract the `id` value.
+
+Resolve REAL_BOARD_ID:
+- If {{boardId}} is a plain number → REAL_BOARD_ID = {{boardId}}.
+- Otherwise → look at the sprint field data from Step 1 issues. It may contain `rapidViewId` or `boardId` (e.g. `rapidViewId=87`). Extract that number → REAL_BOARD_ID.
+- If not found in sprint field → fetch issue DID-1 or any issue from this project using GetIssueTool and inspect its sprint field for `rapidViewId`.
 
 Store REAL_BOARD_ID and REAL_SPRINT_ID for use in the report below.
 
